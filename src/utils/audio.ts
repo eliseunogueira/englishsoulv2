@@ -56,7 +56,13 @@ export class EnglishSoulAudio {
 
     public speak(text: string, rate: number = 1.0) {
         this.synth.cancel();
-        this.speakPromise(text, rate);
+        // 🛠️ CORREÇÃO: Evita que o TTS leia "Capital I" quando a palavra é apenas "I"
+        let textToSpeak = text;
+        if (textToSpeak.trim() === 'I') {
+            textToSpeak = 'i'; // O TTS pronuncia o som corretamente se estiver em minúsculo isolado
+        }
+
+        this.speakPromise(textToSpeak, rate);
     }
 
     public playWord(word: string) { this.speak(word, 0.7); }

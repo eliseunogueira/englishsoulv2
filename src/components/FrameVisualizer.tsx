@@ -1,5 +1,5 @@
 // src/components/FrameVisualizer.tsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { Lesson } from '../types/lesson';
 import { audioEngine } from '../utils/audio';
 
@@ -10,7 +10,11 @@ interface FrameVisualizerProps {
 export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
     const frameParts = lesson.concept.core_frame.split(' + ');
     const [filledSlots, setFilledSlots] = useState<Record<number, string>>({});
-    const [validationMessage, setValidationMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+    const [validationMessage, setValidationMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+    const isThirdPerson = (subject: string | undefined) => {
+        return ['He', 'She', 'It'].includes(subject || '');
+    };
 
     const handleWordClick = (word: string, type: 'subject' | 'verb' | 'object') => {
         audioEngine.playWord(word);
@@ -24,6 +28,13 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
         if (targetSlotIndex !== -1) {
             const newSlots = { ...filledSlots, [targetSlotIndex]: word };
             setFilledSlots(newSlots);
+
+            if (type === 'subject' && isThirdPerson(word)) {
+                setValidationMessage({
+                    text: "⚠️ Atenção: 3ª Pessoa (He/She/It). O verbo ganha um 'S' no final!",
+                    type: 'info'
+                });
+            }
 
             if (newSlots[1] && newSlots[2]) {
                 validateCombination(newSlots[1], newSlots[2]);
@@ -48,8 +59,6 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
                     text: "✅ Combinação perfeita! A frase faz sentido.",
                     type: 'success'
                 });
-                const subject = filledSlots[0] || "I";
-                audioEngine.playSentence(`${subject} ${verbBase} ${object}.`);
             }
         }
     };
@@ -59,10 +68,22 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
         setValidationMessage(null);
     };
 
-    const allAvailableObjects = Array.from(new Set([
+    // Função para construir e tocar a frase completa
+    const playFullSentence = () => {
+        const subject = filledSlots[0] || "I";
+        const verbBase = filledSlots[1];
+        const object = filledSlots[2];
+        const verb = isThirdPerson(subject) ? `${verbBase}s` : verbBase;
+        audioEngine.playSentence(`${subject} ${verb} ${object}.`);
+    };
+
+    // ✅ NOVO: Verifica se o frame está 100% completo
+    const isFrameComplete = filledSlots[0] && filledSlots[1] && filledSlots[2];
+
+    const allAvailableObjects = useMemo(() => Array.from(new Set([
         ...lesson.vocabulary.nouns,
         ...lesson.vocabulary.verbs.flatMap(v => v.valid_objects.filter(vo => vo !== 'all'))
-    ]));
+    ])), [lesson]);
 
     return (
         <div className="bg-soul-gray border border-gray-800 rounded-xl p-6 mb-8">
@@ -78,40 +99,63 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
                 </button>
             </div>
 
+            {/* Slots do Frame */}
             <div className="flex flex-wrap justify-center gap-4 mb-8">
                 {frameParts.map((part, index) => {
                     const isFilled = filledSlots[index];
+                    const isVerbSlot = index === 1;
+                    const isThirdPersonVerb = isVerbSlot && isThirdPerson(filledSlots[0]) && isFilled;
+
                     return (
                         <div
                             key={index}
                             className={`
                 flex flex-col items-center justify-center w-32 h-24 rounded-lg border-2 transition-all duration-300
                 ${isFilled
-                                ? 'border-soul-gold bg-soul-gold/10'
+                                ? (isThirdPersonVerb ? 'border-purple-500 bg-purple-500/10' : 'border-soul-gold bg-soul-gold/10')
                                 : 'border-dashed border-gray-600 bg-soul-dark'}
               `}
                         >
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
                 {part}
               </span>
-                            <span className={`text-lg font-bold ${isFilled ? 'text-soul-gold' : 'text-gray-600'}`}>
+                            <span className={`text-lg font-bold ${isFilled ? (isThirdPersonVerb ? 'text-purple-400' : 'text-soul-gold') : 'text-gray-600'}`}>
                 {isFilled || '___'}
               </span>
+                            {isThirdPersonVerb && (
+                                <span className="text-[9px] text-purple-400 font-bold mt-1">+ S</span>
+                            )}
                         </div>
                     );
                 })}
             </div>
 
+            {/* Mensagem de Validação */}
             {validationMessage && (
                 <div className={`text-center p-3 rounded-lg mb-6 text-sm font-medium ${
                     validationMessage.type === 'success'
                         ? 'bg-green-900/30 text-green-400 border border-green-500/50'
-                        : 'bg-red-900/30 text-red-400 border border-red-500/50'
+                        : validationMessage.type === 'info'
+                            ? 'bg-purple-900/30 text-purple-400 border border-purple-500/50'
+                            : 'bg-red-900/30 text-red-400 border border-red-500/50'
                 }`}>
                     {validationMessage.text}
                 </div>
             )}
 
+            {/* ✅ NOVO: Botão "Ler Frase Completa" */}
+            {isFrameComplete && (
+                <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-4">
+                    <button
+                        onClick={playFullSentence}
+                        className="bg-soul-gold text-soul-dark font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all flex items-center gap-2 text-lg shadow-lg hover:shadow-soul-gold/20 hover:scale-105"
+                    >
+                        🔊 Ler Frase Completa
+                    </button>
+                </div>
+            )}
+
+            {/* Banco de Palavras */}
             <div className="space-y-6">
                 <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">1. Escolha o Sujeito</p>
@@ -135,19 +179,24 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
                 <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">2. Escolha a Ação</p>
                     <div className="flex flex-wrap justify-center gap-2">
-                        {lesson.vocabulary.verbs.map((verb, idx) => (
-                            <button
-                                key={`v-${idx}`}
-                                onClick={() => handleWordClick(verb.base, 'verb')}
-                                className={`px-4 py-2 rounded-md border transition-all text-sm font-medium ${
-                                    filledSlots[1] === verb.base
-                                        ? 'bg-soul-gold text-soul-dark border-soul-gold'
-                                        : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
-                                }`}
-                            >
-                                {verb.base}
-                            </button>
-                        ))}
+                        {lesson.vocabulary.verbs.map((verb, idx) => {
+                            const displayVerb = isThirdPerson(filledSlots[0]) ? `${verb.base}s` : verb.base;
+                            const isSelected = filledSlots[1] === verb.base;
+
+                            return (
+                                <button
+                                    key={`v-${idx}`}
+                                    onClick={() => handleWordClick(verb.base, 'verb')}
+                                    className={`px-4 py-2 rounded-md border transition-all text-sm font-medium ${
+                                        isSelected
+                                            ? (isThirdPerson(filledSlots[0]) ? 'bg-purple-500 text-white border-purple-500' : 'bg-soul-gold text-soul-dark border-soul-gold')
+                                            : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
+                                    }`}
+                                >
+                                    {displayVerb}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
