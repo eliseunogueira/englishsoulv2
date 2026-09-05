@@ -6,23 +6,19 @@ export class EnglishSoulAudio {
 
     constructor() {
         this.synth = window.speechSynthesis;
-        // Garante que as vozes sejam carregadas (especialmente no Chrome)
         if (this.synth.onvoiceschanged !== undefined) {
             this.synth.onvoiceschanged = () => {};
         }
     }
 
-    // Novo método: Definir a voz com base na URI salva pelo usuário
     public setVoice(voiceURI: string | null) {
         this.selectedVoiceURI = voiceURI;
     }
 
-    // Novo método: Obter todas as vozes em inglês agrupadas por sotaque
     public getEnglishVoices() {
         const voices = this.synth.getVoices();
         const englishVoices = voices.filter(v => v.lang.startsWith('en'));
 
-        // Agrupar por região para facilitar a UI
         return {
             us: englishVoices.filter(v => v.lang === 'en-US'),
             gb: englishVoices.filter(v => v.lang === 'en-GB'),
@@ -37,7 +33,6 @@ export class EnglishSoulAudio {
             const voice = voices.find(v => v.voiceURI === this.selectedVoiceURI);
             if (voice) return voice;
         }
-        // Fallback inteligente: Tenta US, depois GB, depois qualquer uma em inglês
         return voices.find(v => v.lang === 'en-US') ||
             voices.find(v => v.lang.startsWith('en')) ||
             null;

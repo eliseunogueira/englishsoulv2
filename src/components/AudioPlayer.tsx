@@ -7,7 +7,6 @@ interface AudioPlayerProps {
 }
 
 export function AudioPlayer({ lesson }: AudioPlayerProps) {
-    // Se a lição não tiver dados de áudio, não renderiza nada
     if (!lesson.chunks?.length && !lesson.sentences?.length && !lesson.contexts?.length) {
         return null;
     }
@@ -15,10 +14,9 @@ export function AudioPlayer({ lesson }: AudioPlayerProps) {
     return (
         <div className="bg-soul-gray border border-gray-800 rounded-xl p-6 mt-8">
             <h3 className="text-xl font-bold text-soul-gold mb-6 flex items-center gap-2">
-                🎧 Áudio Inteligente (4 Camadas)
+                Áudio Inteligente (4 Camadas)
             </h3>
 
-            {/* CAMADA 1: CHUNKS */}
             {lesson.chunks && lesson.chunks.length > 0 && (
                 <div className="mb-6">
                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
@@ -38,7 +36,6 @@ export function AudioPlayer({ lesson }: AudioPlayerProps) {
                 </div>
             )}
 
-            {/* CAMADA 2: SENTENCES */}
             {lesson.sentences && lesson.sentences.length > 0 && (
                 <div className="mb-6">
                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
@@ -52,7 +49,7 @@ export function AudioPlayer({ lesson }: AudioPlayerProps) {
                                 className="w-full text-left bg-soul-dark border border-gray-700 hover:border-soul-gold p-4 rounded-lg transition-all group"
                             >
                                 <div className="text-gray-200 group-hover:text-white font-medium">
-                                    🔊 {sentence.text}
+                                    {sentence.text}
                                 </div>
                                 <div className="text-gray-500 text-sm mt-1">
                                     {sentence.translation}
@@ -63,7 +60,6 @@ export function AudioPlayer({ lesson }: AudioPlayerProps) {
                 </div>
             )}
 
-            {/* CAMADA 3: CONTEXTS */}
             {lesson.contexts && lesson.contexts.length > 0 && (
                 <div>
                     <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
@@ -71,7 +67,6 @@ export function AudioPlayer({ lesson }: AudioPlayerProps) {
                     </h4>
                     <div className="space-y-2">
                         {lesson.contexts.map((context, idx) => {
-                            // Separa o texto em frases para a pausa do áudio
                             const sentencesArray = context.text.split('. ')
                                 .filter(s => s.trim().length > 0)
                                 .map(s => s.endsWith('.') ? s : s + '.');
@@ -83,7 +78,7 @@ export function AudioPlayer({ lesson }: AudioPlayerProps) {
                                     className="w-full text-left bg-gradient-to-r from-soul-dark to-gray-900 border border-soul-gold/30 hover:border-soul-gold p-4 rounded-lg transition-all"
                                 >
                                     <div className="text-soul-gold font-bold mb-1 flex items-center gap-2">
-                                        🎬 Contexto
+                                        Contexto
                                     </div>
                                     <div className="text-gray-300 italic">
                                         "{context.text}"

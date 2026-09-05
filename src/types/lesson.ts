@@ -1,16 +1,13 @@
 // src/types/lesson.ts
 
-// 1. Definição das Fases do Curso (Baseado no seu HTML)
 export type LessonPhase = 'foundation' | 'expansion' | 'complexity' | 'mastery';
 
-// 2. O Verbo Inteligente (A mágica semântica que criamos)
 export interface Verb {
     base: string;
     past: string;
-    valid_objects: string[]; // Ex: "drink" -> ["water", "coffee"]
+    valid_objects: string[];
 }
 
-// 3. A Frase Estruturada
 export interface Sentence {
     text: string;
     translation: string;
@@ -21,28 +18,31 @@ export interface Sentence {
     };
 }
 
-// 4. O Contexto (Áudio Nível 4)
 export interface Context {
     text: string;
     translation: string;
 }
 
-// 5. A Interface Principal da Lição
 export interface Lesson {
-    concept: { core_frame:string, description:string };
-    id: string; // Ex: "lesson_1"
+    id: string;
     phase: LessonPhase;
     title: string;
-    semantic_field: string; // Ex: "CASA E FAMÍLIA"
-    //core_frame: string; // Ex: "SUBJECT + VERB + OBJECT"
+    semantic_field: string;
+    core_frame: string;
+
+    concept: {
+        core_frame: string;
+        description: string;
+    };
 
     vocabulary: {
+        pronouns: string[];
         nouns: string[];
         verbs: Verb[];
         qualifiers: string[];
     };
 
-    chunks: string[]; // Ex: ["some water", "my family"]
+    chunks: string[];
     sentences: Sentence[];
     contexts: Context[];
 

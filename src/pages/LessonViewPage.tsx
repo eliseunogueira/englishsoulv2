@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { AudioPlayer } from '../components/AudioPlayer';
+import { FrameVisualizer } from '../components/FrameVisualizer';
 import { VoiceSelector } from '../components/VoiceSelector';
 
 export function LessonViewPage() {
@@ -20,7 +21,6 @@ export function LessonViewPage() {
     return (
         <div className="min-h-screen bg-soul-dark text-soul-text p-6 font-sans">
             <div className="max-w-3xl mx-auto">
-                {/* Header com Botão Voltar */}
                 <button
                     onClick={() => navigate('/')}
                     className="mb-6 text-gray-400 hover:text-soul-gold transition-colors flex items-center gap-2"
@@ -28,21 +28,21 @@ export function LessonViewPage() {
                     ← Voltar para as Lições
                 </button>
 
-                {/* Cabeçalho da Lição */}
-                <header className="mb-8 border-b border-gray-800 pb-6">
-                    <span className="text-xs font-bold text-soul-gold uppercase tracking-widest">
-                        {currentLesson.phase} · {currentLesson.semantic_field}
-                    </span>
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-white mt-2 mb-4">
-                        {currentLesson.title}
-                    </h1>
-                    <p className="text-gray-400 italic">
-                        "{currentLesson.concept.description}"
-                    </p>
-                    <VoiceSelector /> {/* <-- AQUI */}
+                <header className="mb-8 border-b border-gray-800 pb-6 flex justify-between items-start">
+                    <div>
+            <span className="text-xs font-bold text-soul-gold uppercase tracking-widest">
+              {currentLesson.phase} · {currentLesson.semantic_field}
+            </span>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-white mt-2 mb-4">
+                            {currentLesson.title}
+                        </h1>
+                        <p className="text-gray-400 italic">
+                            "{currentLesson.concept.description}"
+                        </p>
+                    </div>
+                    <VoiceSelector />
                 </header>
 
-                {/* O Frame Visual */}
                 <section className="bg-soul-gray border-2 border-soul-gold/50 rounded-xl p-6 mb-8 text-center">
                     <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
                         O Esqueleto (Core Frame)
@@ -52,7 +52,6 @@ export function LessonViewPage() {
                     </div>
                 </section>
 
-                {/* Vocabulário Rápido */}
                 {currentLesson.vocabulary.verbs.length > 0 && (
                     <section className="mb-8">
                         <h2 className="text-xl font-bold text-white mb-4">Verbos da Lição</h2>
@@ -70,7 +69,7 @@ export function LessonViewPage() {
                     </section>
                 )}
 
-                {/* O Player de Áudio em 4 Camadas */}
+                <FrameVisualizer lesson={currentLesson} />
                 <AudioPlayer lesson={currentLesson} />
 
             </div>

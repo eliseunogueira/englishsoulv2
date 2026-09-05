@@ -9,12 +9,10 @@ export function VoiceSelector() {
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        // Carrega as vozes e aplica a preferida do usuário
         const allVoices = window.speechSynthesis.getVoices();
         const englishVoices = allVoices.filter(v => v.lang.startsWith('en'));
         setVoices(englishVoices);
 
-        // Aplica a voz salva no motor
         audioEngine.setVoice(preferredVoiceURI);
     }, [preferredVoiceURI]);
 
@@ -39,10 +37,10 @@ export function VoiceSelector() {
                             setIsOpen(false);
                         }}
                     >
-                        🤖 Padrão do Sistema (Recomendado)
+                        Padrão do Sistema (Recomendado)
                     </div>
 
-                    <div className="border-t border-gray-700 p-2 text-xs font-bold text-gray-500 uppercase">🇺🇸 American English</div>
+                    <div className="border-t border-gray-700 p-2 text-xs font-bold text-gray-500 uppercase">🇸 American English</div>
                     {voices.filter(v => v.lang === 'en-US').map(voice => (
                         <div
                             key={voice.voiceURI}
@@ -50,7 +48,6 @@ export function VoiceSelector() {
                             onClick={() => {
                                 setPreferredVoice(voice.voiceURI);
                                 setIsOpen(false);
-                                // Teste rápido ao selecionar
                                 audioEngine.playWord("Hello");
                             }}
                         >

@@ -2,7 +2,6 @@
 import type { Lesson } from '../types/lesson';
 import { useAppStore } from '../store/useAppStore';
 
-// ✅ A interface só pede o lesson e uma função de clique simples
 interface LessonCardProps {
     lesson: Lesson;
     onClick: () => void;
@@ -16,7 +15,7 @@ export function LessonCard({ lesson, onClick }: LessonCardProps) {
 
     return (
         <div
-            onClick={onClick} // ✅ Usa o onClick simples
+            onClick={onClick}
             className="bg-soul-gray border border-soul-gray hover:border-soul-gold rounded-lg p-5 cursor-pointer transition-all duration-300 hover:-translate-y-1 shadow-lg group"
         >
             <div className="flex justify-between items-start mb-2">

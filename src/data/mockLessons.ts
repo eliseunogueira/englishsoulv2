@@ -6,19 +6,21 @@ export const mockLesson1: Lesson = {
     phase: "foundation",
     title: "The Basics of a Sentence",
     semantic_field: "CASA E FAMÍLIA",
+    core_frame: "SUBJECT + VERB + OBJECT",
 
-    // ✅ ADICIONE ESTE BLOCO AQUI:
     concept: {
         core_frame: "SUBJECT + VERB + OBJECT",
         description: "O esqueleto básico de 90% das frases em inglês."
     },
 
     vocabulary: {
-        nouns: ["brother", "sister", "father", "mother", "family"],
+        pronouns: ["I", "You", "He", "She", "We", "They"],
+        nouns: ["brother", "sister", "father", "mother", "family", "fish", "meat", "water", "coffee", "beer", "english", "portuguese"],
         verbs: [
-            { base: "eat", past: "ate", valid_objects: ["fish", "meat"] },
-            { base: "drink", past: "drank", valid_objects: ["water", "coffee", "beer"] },
-            { base: "speak", past: "spoke", valid_objects: ["english", "portuguese"] }
+            { base: "eat", past: "ate", valid_objects: ["fish", "meat", "breakfast", "lunch", "dinner"] },
+            { base: "drink", past: "drank", valid_objects: ["water", "coffee", "beer", "juice", "milk", "wine"] },
+            { base: "speak", past: "spoke", valid_objects: ["english", "portuguese", "spanish"] },
+            { base: "need", past: "needed", valid_objects: ["all"] }
         ],
         qualifiers: ["with", "and", "now", "today"]
     },
@@ -48,3 +50,5 @@ export const mockLesson1: Lesson = {
         }
     ]
 };
+
+export const mockLessons: Lesson[] = [mockLesson1];

@@ -2,9 +2,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
-import { mockLesson1 } from '../data/mockLessons';
+import { mockLessons } from '../data/mockLessons';
 import { LessonCard } from '../components/LessonCard';
-import type {Lesson} from "../types/lesson.ts";
 
 export function LessonListPage() {
     const { lessons, setLessons, setCurrentLesson } = useAppStore();
@@ -12,12 +11,11 @@ export function LessonListPage() {
 
     useEffect(() => {
         if (lessons.length === 0) {
-            setLessons([mockLesson1]); // No futuro, virá da API
+            setLessons(mockLessons);
         }
     }, [lessons.length, setLessons]);
 
-    // ✅ Cria a função que o Card vai chamar
-    const handleLessonClick = (lesson: Lesson) => {
+    const handleLessonClick = (lesson: typeof mockLessons[0]) => {
         setCurrentLesson(lesson);
         navigate(`/lesson/${lesson.id}`);
     };
@@ -40,7 +38,6 @@ export function LessonListPage() {
                         <LessonCard
                             key={lesson.id}
                             lesson={lesson}
-                            // ✅ Passa a função embrulho. Note a arrow function!
                             onClick={() => handleLessonClick(lesson)}
                         />
                     ))}
