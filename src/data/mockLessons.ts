@@ -48,6 +48,40 @@ export const mockLesson1: Lesson = {
             pattern: "SUBJECT + DON'T + VERB + OBJECT",
             example: "I don't eat fish."
         }
+    ],
+    exercises: [
+        {
+            id: "ex_1",
+            type: "multiple_choice",
+            instruction: "Qual frase está gramaticalmente correta?",
+            options: [
+                "He eat meat.",
+                "He eats meat.",
+                "He eating meat."
+            ],
+            correct_answer: "He eats meat.",
+            audio_text: "He eats meat."
+        },
+        {
+            id: "ex_2",
+            type: "multiple_choice",
+            instruction: "Como você diz 'Eu não bebo cerveja'?",
+            options: [
+                "I no drink beer.",
+                "I doesn't drink beer.",
+                "I don't drink beer."
+            ],
+            correct_answer: "I don't drink beer.",
+            audio_text: "I don't drink beer."
+        },
+        {
+            id: "ex_3",
+            type: "reorder",
+            instruction: "Organize as palavras para formar a frase:",
+            options: ["water", "drink", "I", "now"],
+            correct_answer: ["I", "drink", "water", "now"],
+            audio_text: "I drink water now."
+        }
     ]
 };
 

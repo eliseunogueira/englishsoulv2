@@ -4,6 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { FrameVisualizer } from '../components/FrameVisualizer';
 import { VoiceSelector } from '../components/VoiceSelector';
+import { ExerciseEngine } from '../components/ExerciseEngine';
 
 export function LessonViewPage() {
     const currentLesson = useAppStore((state) => state.currentLesson);
@@ -71,6 +72,10 @@ export function LessonViewPage() {
 
                 <FrameVisualizer lesson={currentLesson} />
                 <AudioPlayer lesson={currentLesson} />
+                {/* Adicione esta linha: */}
+                {currentLesson.exercises && currentLesson.exercises.length > 0 && (
+                    <ExerciseEngine lesson={currentLesson} />
+                )}
 
             </div>
         </div>

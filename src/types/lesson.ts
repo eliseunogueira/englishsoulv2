@@ -8,6 +8,19 @@ export interface Verb {
     valid_objects: string[];
 }
 
+export type ExerciseType = 'multiple_choice' | 'reorder' | 'fill_blank';
+
+export interface Exercise {
+    id: string;
+    type: ExerciseType;
+    instruction: string;
+    question_text?: string; // Para fill_blank ou reorder
+    options: string[];      // Opções de múltipla escolha ou palavras para reorder
+    correct_answer: string | string[]; // String simples ou array para reorder
+    audio_text?: string;    // O que o TTS deve falar ao acertar
+}
+
+
 export interface Sentence {
     text: string;
     translation: string;
@@ -51,4 +64,5 @@ export interface Lesson {
         pattern: string;
         example: string;
     }[];
+    exercises: Exercise[];
 }
