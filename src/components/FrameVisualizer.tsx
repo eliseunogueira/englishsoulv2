@@ -1,5 +1,5 @@
 // src/components/FrameVisualizer.tsx
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import type { Lesson } from '../types/lesson';
 import { audioEngine } from '../utils/audio';
 
@@ -8,58 +8,52 @@ interface FrameVisualizerProps {
 }
 
 export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
-    const frameParts = lesson.concept.core_frame.split(' + ');
-    const [filledSlots, setFilledSlots] = useState<Record<number, string>>({});
+    const [filledSlots, setFilledSlots] = useState<Record<string, string>>({});
     const [validationMessage, setValidationMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-    const isThirdPerson = (subject: string | undefined) => {
-        return ['He', 'She', 'It'].includes(subject || '');
-    };
-
-    const handleWordClick = (word: string, type: 'subject' | 'verb' | 'object') => {
+    const handleWordClick = (word: string, pieceType: string) => {
         audioEngine.playWord(word);
         setValidationMessage(null);
 
-        let targetSlotIndex = -1;
-        if (type === 'subject') targetSlotIndex = 0;
-        else if (type === 'verb') targetSlotIndex = 1;
-        else if (type === 'object') targetSlotIndex = 2;
+        // Encontrar o primeiro slot vazio que aceita este tipo de peça
+        const targetSlot = lesson.frame_recipe.find(slot => {
+            const isFilled = filledSlots[slot.id];
+            const acceptsCorrectType = slot.accepts === pieceType ||
+                (slot.accepts === 'complement' && ['object', 'adjective', 'preposition'].includes(pieceType));
+            return !isFilled && acceptsCorrectType;
+        });
 
-        if (targetSlotIndex !== -1) {
-            const newSlots = { ...filledSlots, [targetSlotIndex]: word };
+        if (targetSlot) {
+            const newSlots = { ...filledSlots, [targetSlot.id]: word };
             setFilledSlots(newSlots);
 
-            if (type === 'subject' && isThirdPerson(word)) {
-                setValidationMessage({
-                    text: "⚠️ Atenção: 3ª Pessoa (He/She/It). O verbo ganha um 'S' no final!",
-                    type: 'info'
-                });
-            }
-
-            if (newSlots[1] && newSlots[2]) {
-                validateCombination(newSlots[1], newSlots[2]);
+            // Validação semântica (se for complemento)
+            if (pieceType === 'complement' || pieceType === 'object' || pieceType === 'adjective') {
+                validateComplement(word, newSlots);
             }
         }
     };
 
-    const validateCombination = (verbBase: string, object: string) => {
-        const selectedVerb = lesson.vocabulary.verbs.find(v => v.base === verbBase);
+    const validateComplement = (complement: string, slots: Record<string, string>) => {
+        const verbBase = slots['verb'];
+        if (!verbBase) return;
 
-        if (selectedVerb) {
-            const isValid = selectedVerb.valid_objects.includes('all') || selectedVerb.valid_objects.includes(object);
+        const selectedVerb = lesson.inventory.verbs.find(v => v.base === verbBase);
+        if (!selectedVerb) return;
 
-            if (!isValid) {
-                const validExamples = selectedVerb.valid_objects.slice(0, 3).join(', ');
-                setValidationMessage({
-                    text: `Ops! Em inglês, nós geralmente "${selectedVerb.base}" (ex: ${validExamples}). "${object}" não combina com este verbo.`,
-                    type: 'error'
-                });
-            } else {
-                setValidationMessage({
-                    text: "✅ Combinação perfeita! A frase faz sentido.",
-                    type: 'success'
-                });
-            }
+        const isValid = selectedVerb.valid_complements.includes(complement);
+
+        if (!isValid) {
+            const validExamples = selectedVerb.valid_complements.slice(0, 3).join(', ');
+            setValidationMessage({
+                text: `Ops! "${selectedVerb.base}" geralmente combina com: ${validExamples}. "${complement}" não é uma combinação típica.`,
+                type: 'error'
+            });
+        } else {
+            setValidationMessage({
+                text: "✅ Combinação perfeita!",
+                type: 'success'
+            });
         }
     };
 
@@ -68,22 +62,9 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
         setValidationMessage(null);
     };
 
-    // Função para construir e tocar a frase completa
-    const playFullSentence = () => {
-        const subject = filledSlots[0] || "I";
-        const verbBase = filledSlots[1];
-        const object = filledSlots[2];
-        const verb = isThirdPerson(subject) ? `${verbBase}s` : verbBase;
-        audioEngine.playSentence(`${subject} ${verb} ${object}.`);
-    };
-
-    // ✅ NOVO: Verifica se o frame está 100% completo
-    const isFrameComplete = filledSlots[0] && filledSlots[1] && filledSlots[2];
-
-    const allAvailableObjects = useMemo(() => Array.from(new Set([
-        ...lesson.vocabulary.nouns,
-        ...lesson.vocabulary.verbs.flatMap(v => v.valid_objects.filter(vo => vo !== 'all'))
-    ])), [lesson]);
+    const isFrameComplete = lesson.frame_recipe.every(slot =>
+        slot.isOptional || filledSlots[slot.id]
+    );
 
     return (
         <div className="bg-soul-gray border border-gray-800 rounded-xl p-6 mb-8">
@@ -99,32 +80,26 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
                 </button>
             </div>
 
-            {/* Slots do Frame */}
+            {/* Slots Dinâmicos baseados no frame_recipe */}
             <div className="flex flex-wrap justify-center gap-4 mb-8">
-                {frameParts.map((part, index) => {
-                    const isFilled = filledSlots[index];
-                    const isVerbSlot = index === 1;
-                    const isThirdPersonVerb = isVerbSlot && isThirdPerson(filledSlots[0]) && isFilled;
-
+                {lesson.frame_recipe.map((slot) => {
+                    const isFilled = filledSlots[slot.id];
                     return (
                         <div
-                            key={index}
+                            key={slot.id}
                             className={`
                 flex flex-col items-center justify-center w-32 h-24 rounded-lg border-2 transition-all duration-300
                 ${isFilled
-                                ? (isThirdPersonVerb ? 'border-purple-500 bg-purple-500/10' : 'border-soul-gold bg-soul-gold/10')
+                                ? 'border-soul-gold bg-soul-gold/10'
                                 : 'border-dashed border-gray-600 bg-soul-dark'}
               `}
                         >
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                {part}
+                {slot.label}
               </span>
-                            <span className={`text-lg font-bold ${isFilled ? (isThirdPersonVerb ? 'text-purple-400' : 'text-soul-gold') : 'text-gray-600'}`}>
+                            <span className={`text-lg font-bold ${isFilled ? 'text-soul-gold' : 'text-gray-600'}`}>
                 {isFilled || '___'}
               </span>
-                            {isThirdPersonVerb && (
-                                <span className="text-[9px] text-purple-400 font-bold mt-1">+ S</span>
-                            )}
                         </div>
                     );
                 })}
@@ -143,12 +118,18 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
                 </div>
             )}
 
-            {/* ✅ NOVO: Botão "Ler Frase Completa" */}
+            {/* Botão Ler Frase Completa */}
             {isFrameComplete && (
-                <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-4">
+                <div className="flex justify-center mb-8">
                     <button
-                        onClick={playFullSentence}
-                        className="bg-soul-gold text-soul-dark font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all flex items-center gap-2 text-lg shadow-lg hover:shadow-soul-gold/20 hover:scale-105"
+                        onClick={() => {
+                            const sentence = lesson.frame_recipe
+                                .map(slot => filledSlots[slot.id])
+                                .filter(Boolean)
+                                .join(' ');
+                            audioEngine.playSentence(sentence + '.');
+                        }}
+                        className="bg-soul-gold text-soul-dark font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all"
                     >
                         🔊 Ler Frase Completa
                     </button>
@@ -157,67 +138,109 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
 
             {/* Banco de Palavras */}
             <div className="space-y-6">
+                {/* Sujeitos */}
                 <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">1. Escolha o Sujeito</p>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Sujeitos</p>
                     <div className="flex flex-wrap justify-center gap-2">
-                        {lesson.vocabulary.pronouns.map((pronoun, idx) => (
+                        {lesson.inventory.subjects.map((subject, idx) => (
                             <button
-                                key={`p-${idx}`}
-                                onClick={() => handleWordClick(pronoun, 'subject')}
+                                key={`s-${idx}`}
+                                onClick={() => handleWordClick(subject, 'subject')}
                                 className={`px-4 py-2 rounded-md border transition-all text-sm font-bold ${
-                                    filledSlots[0] === pronoun
+                                    filledSlots['subject'] === subject
                                         ? 'bg-soul-gold text-soul-dark border-soul-gold'
                                         : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
                                 }`}
                             >
-                                {pronoun}
+                                {subject}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">2. Escolha a Ação</p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                        {lesson.vocabulary.verbs.map((verb, idx) => {
-                            const displayVerb = isThirdPerson(filledSlots[0]) ? `${verb.base}s` : verb.base;
-                            const isSelected = filledSlots[1] === verb.base;
-
-                            return (
+                {/* Auxiliares (se houver na lição) */}
+                {lesson.inventory.auxiliaries.length > 0 && (
+                    <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Auxiliares</p>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {lesson.inventory.auxiliaries.map((aux, idx) => (
                                 <button
-                                    key={`v-${idx}`}
-                                    onClick={() => handleWordClick(verb.base, 'verb')}
-                                    className={`px-4 py-2 rounded-md border transition-all text-sm font-medium ${
-                                        isSelected
-                                            ? (isThirdPerson(filledSlots[0]) ? 'bg-purple-500 text-white border-purple-500' : 'bg-soul-gold text-soul-dark border-soul-gold')
+                                    key={`a-${idx}`}
+                                    onClick={() => handleWordClick(aux, 'auxiliary')}
+                                    className={`px-4 py-2 rounded-md border transition-all text-sm ${
+                                        filledSlots['auxiliary'] === aux
+                                            ? 'bg-soul-gold text-soul-dark border-soul-gold'
                                             : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
                                     }`}
                                 >
-                                    {displayVerb}
+                                    {aux}
                                 </button>
-                            );
-                        })}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
+                {/* Verbos */}
                 <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">3. Escolha o Objeto</p>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Verbos</p>
                     <div className="flex flex-wrap justify-center gap-2">
-                        {allAvailableObjects.map((obj, idx) => (
+                        {lesson.inventory.verbs.map((verb, idx) => (
                             <button
-                                key={`o-${idx}`}
-                                onClick={() => handleWordClick(obj, 'object')}
-                                className={`px-4 py-2 rounded-md border transition-all text-sm ${
-                                    filledSlots[2] === obj
+                                key={`v-${idx}`}
+                                onClick={() => handleWordClick(verb.base, 'main_verb')}
+                                className={`px-4 py-2 rounded-md border transition-all text-sm font-medium ${
+                                    filledSlots['verb'] === verb.base
                                         ? 'bg-soul-gold text-soul-dark border-soul-gold'
                                         : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
                                 }`}
                             >
-                                {obj}
+                                {verb.base}
                             </button>
                         ))}
                     </div>
                 </div>
+
+                {/* Complementos */}
+                <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Complementos</p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {lesson.inventory.complements.map((comp, idx) => (
+                            <button
+                                key={`c-${idx}`}
+                                onClick={() => handleWordClick(comp, 'complement')}
+                                className={`px-4 py-2 rounded-md border transition-all text-sm ${
+                                    filledSlots['complement'] === comp
+                                        ? 'bg-soul-gold text-soul-dark border-soul-gold'
+                                        : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
+                                }`}
+                            >
+                                {comp}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Modificadores (se houver) */}
+                {lesson.inventory.modifiers.length > 0 && (
+                    <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Modificadores</p>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {lesson.inventory.modifiers.map((mod, idx) => (
+                                <button
+                                    key={`m-${idx}`}
+                                    onClick={() => handleWordClick(mod, 'modifier')}
+                                    className={`px-4 py-2 rounded-md border transition-all text-sm ${
+                                        filledSlots['modifier'] === mod
+                                            ? 'bg-soul-gold text-soul-dark border-soul-gold'
+                                            : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
+                                    }`}
+                                >
+                                    {mod}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
