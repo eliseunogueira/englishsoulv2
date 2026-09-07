@@ -1,4 +1,5 @@
 // src/utils/audio.ts
+import { GrammarEngine } from './grammarEngine'; // Importe o motor
 
 export class EnglishSoulAudio {
     private synth: SpeechSynthesis;
@@ -40,12 +41,14 @@ export class EnglishSoulAudio {
 
     private speakPromise(text: string, rate: number = 1.0): Promise<void> {
         return new Promise((resolve) => {
-            const utterance = new SpeechSynthesisUtterance(text);
+            const utterance = new SpeechSynthesisUtterance();
+            utterance.text = GrammarEngine.prepareForTTS(text);
             const voice = this.getActiveVoice();
             if (voice) utterance.voice = voice;
 
             utterance.lang = voice?.lang || 'en-US';
             utterance.rate = rate;
+
 
             utterance.onend = () => resolve();
             utterance.onerror = () => resolve();
@@ -56,13 +59,7 @@ export class EnglishSoulAudio {
 
     public speak(text: string, rate: number = 1.0) {
         this.synth.cancel();
-        // 🛠️ CORREÇÃO: Evita que o TTS leia "Capital I" quando a palavra é apenas "I"
-        let textToSpeak = text;
-        if (textToSpeak.trim() === 'I') {
-            textToSpeak = 'i'; // O TTS pronuncia o som corretamente se estiver em minúsculo isolado
-        }
-
-        this.speakPromise(textToSpeak, rate);
+        this.speakPromise(text, rate);
     }
 
     public playWord(word: string) { this.speak(word, 0.7); }
