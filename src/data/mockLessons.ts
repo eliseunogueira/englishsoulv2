@@ -202,6 +202,26 @@ export const mockLesson13: Lesson = {
             audio_text: "She isn't happy.",
             skill: "to_be_negative",
             difficulty: 2
+        },
+        {
+            id: "ex_13_2",
+            type: "reorder",
+            instruction: "Organize as palavras na ordem correta:",
+            options: ["happy", "is", "She"],
+            correct_answer: ["She", "is", "happy"],
+            audio_text: "She is happy.",
+            skill: "to_be_syntax",
+            difficulty: 1
+        },
+        {
+            id: "ex_13_3",
+            type: "multiple_choice",
+            instruction: "Como você diz 'Eles não estão na festa'?",
+            options: ["They don't are at the party.", "They aren't at the party.", "They not at the party."],
+            correct_answer: "They aren't at the party.",
+            audio_text: "They aren't at the party.",
+            skill: "to_be_negative_plural",
+            difficulty: 2
         }
     ]
 };
@@ -298,6 +318,26 @@ export const mockLesson17: Lesson = {
             correct_answer: "I didn't need.",
             audio_text: "I didn't need.",
             skill: "past_negative",
+            difficulty: 2
+        },
+        {
+            id: "ex_17_2",
+            type: "reorder",
+            instruction: "Organize as palavras para formar a frase no passado:",
+            options: ["to", "finish", "didn't", "I", "need"],
+            correct_answer: ["I", "didn't", "need", "to", "finish"],
+            audio_text: "I didn't need to finish.",
+            skill: "past_negative_syntax",
+            difficulty: 2
+        },
+        {
+            id: "ex_17_3",
+            type: "multiple_choice",
+            instruction: "Qual é a forma passada de 'speak'?",
+            options: ["speaked", "spoke", "spoken"],
+            correct_answer: "spoke",
+            audio_text: "spoke",
+            skill: "past_irregular",
             difficulty: 2
         }
     ]
@@ -400,6 +440,26 @@ export const mockLesson21: Lesson = {
             correct_answer: "She will go.",
             audio_text: "She will go.",
             skill: "future_invariant",
+            difficulty: 2
+        },
+        {
+            id: "ex_21_2",
+            type: "reorder",
+            instruction: "Organize as palavras para formar a frase no futuro:",
+            options: ["the", "will", "pay", "bill", "She", "tomorrow"],
+            correct_answer: ["She", "will", "pay", "the", "bill", "tomorrow"],
+            audio_text: "She will pay the bill tomorrow.",
+            skill: "future_syntax",
+            difficulty: 2
+        },
+        {
+            id: "ex_21_3",
+            type: "multiple_choice",
+            instruction: "Como você diz 'Eu não vou usar o vestido rosa'?",
+            options: ["I don't will wear the pink dress.", "I won't wear the pink dress.", "I will not wear the pink dress."],
+            correct_answer: "I won't wear the pink dress.",
+            audio_text: "I won't wear the pink dress.",
+            skill: "future_negative",
             difficulty: 2
         }
     ]
@@ -516,6 +576,16 @@ export const mockLesson26: Lesson = {
             audio_text: "I have been to Paris.",
             skill: "present_perfect_chunk",
             difficulty: 3
+        },
+        {
+            id: "ex_26_3",
+            type: "reorder",
+            instruction: "Organize as palavras para formar a frase no presente contínuo:",
+            options: ["a", "reading", "am", "book", "I"],
+            correct_answer: ["I", "am", "reading", "a", "book"],
+            audio_text: "I am reading a book.",
+            skill: "present_continuous_syntax",
+            difficulty: 2
         }
     ]
 };
