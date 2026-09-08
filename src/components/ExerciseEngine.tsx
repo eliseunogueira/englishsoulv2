@@ -22,6 +22,13 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
 
     const currentExercise = exercises[currentIndex];
 
+    // --- NOVA FUNÇÃO: Tocar o áudio do exercício ---
+    const playExerciseAudio = () => {
+        if (currentExercise?.audio_text) {
+            audioEngine.playSentence(currentExercise.audio_text);
+        }
+    };
+
     // --- Lógica de Interação ---
 
     const handleOptionClick = (option: string) => {
@@ -32,11 +39,9 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
     const handleReorderClick = (word: string) => {
         if (isAnswered) return;
 
-        // Se a palavra já está na resposta, remove (volta para o pool)
         if (reorderSelection.includes(word)) {
             setReorderSelection(prev => prev.filter(w => w !== word));
         } else {
-            // Se está no pool, adiciona na resposta
             setReorderSelection(prev => [...prev, word]);
         }
     };
@@ -46,7 +51,7 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
         setIsAnswered(true);
 
         let isCorrect = false;
-        if (currentExercise.type === 'reorder') {
+        if (currentExercise.type === 'reorder' || currentExercise.type === 'listening') {
             isCorrect = JSON.stringify(reorderSelection) === JSON.stringify(currentExercise.correct_answer);
         } else {
             isCorrect = selectedOption === currentExercise.correct_answer;
@@ -54,7 +59,7 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
 
         if (isCorrect) {
             setScore((prev) => prev + 1);
-            if (currentExercise.audio_text) {
+            if (currentExercise.audio_text && currentExercise.type !== 'listening') {
                 audioEngine.playSentence(currentExercise.audio_text);
             }
         }
@@ -122,6 +127,10 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
     if (!currentExercise) return null;
 
     const isReorder = currentExercise.type === 'reorder';
+    const isListening = currentExercise.type === 'listening';
+    // ✅ CORREÇÃO: Mostra o botão de áudio se o exercício tem audio_text
+    // (independente do tipo - funciona para multiple_choice com áudio também)
+    const hasAudioPrompt = !!currentExercise.audio_text;
 
     return (
         <div className="bg-soul-gray border border-gray-800 rounded-xl p-6 mt-8">
@@ -140,16 +149,32 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
                 {currentExercise.instruction}
             </p>
 
-            {/* Área de Interação: REORDER */}
-            {isReorder && (
+            {/* NOVO: Botão de Áudio para exercícios de Listening */}
+            {hasAudioPrompt && (
+                <div className="mb-8 flex justify-center">
+                    <button
+                        onClick={playExerciseAudio}
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-8 rounded-lg hover:opacity-90 transition-all flex items-center gap-3 text-lg shadow-lg"
+                    >
+                        <span className="text-2xl">🔊</span>
+                        Ouvir Frase
+                    </button>
+                </div>
+            )}
+
+            {/* Área de Interação: REORDER ou LISTENING (reordenação) */}
+            {(isReorder || isListening) && (
                 <div className="mb-8">
                     {/* Zona de Resposta */}
                     <div className="min-h-[70px] bg-soul-dark border-2 border-dashed border-gray-600 rounded-lg p-4 flex flex-wrap gap-2 mb-6 items-center">
                         {reorderSelection.length === 0 ? (
-                            <span className="text-gray-600 italic text-sm">Clique nas palavras abaixo para montar a frase...</span>
+                            <span className="text-gray-600 italic text-sm">
+                {isListening
+                    ? "Ouça a frase e organize as palavras na ordem correta..."
+                    : "Clique nas palavras abaixo para montar a frase..."}
+              </span>
                         ) : (
                             reorderSelection.map((word, idx) => {
-                                // Feedback visual após verificar
                                 let wordClass = "bg-soul-gold text-soul-dark font-bold px-4 py-2 rounded-md hover:opacity-90 transition-all";
 
                                 if (isAnswered) {
@@ -219,10 +244,8 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
                 </div>
             )}
 
-
-
-            {/* Área de Interação: MÚLTIPLA ESCOLHA */}
-            {!isReorder && (
+            {/* Área de Interação: MÚLTIPLA ESCOLHA (incluindo Listening + Multiple Choice) */}
+            {!isReorder && !isListening && (
                 <div className="space-y-3 mb-8">
                     {currentExercise.options.map((option, idx) => {
                         const isSelected = selectedOption === option;
@@ -232,7 +255,6 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
                         let bgColor = 'bg-soul-dark';
                         let textColor = 'text-gray-300';
 
-                        // Estilos de Feedback
                         if (isAnswered) {
                             if (isCorrect) {
                                 borderColor = 'border-green-500';
@@ -268,7 +290,7 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
                 {!isAnswered ? (
                     <button
                         onClick={checkAnswer}
-                        disabled={isReorder ? reorderSelection.length === 0 : !selectedOption}
+                        disabled={isReorder || isListening ? reorderSelection.length === 0 : !selectedOption}
                         className="bg-soul-gold text-soul-dark font-bold py-2 px-8 rounded-lg hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                         Verificar Resposta

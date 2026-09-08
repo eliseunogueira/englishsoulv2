@@ -49,7 +49,8 @@ export interface FrameSlot {
 }
 
 // 5. Exercícios com metadados pedagógicos
-export type ExerciseType = 'multiple_choice' | 'reorder' | 'fill_blank' | 'transform';
+export type ExerciseType = 'multiple_choice' | 'reorder' | 'fill_blank' | 'listening';
+
 
 export interface Exercise {
     id: string;

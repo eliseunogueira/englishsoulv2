@@ -104,6 +104,28 @@ export const mockLesson1: Lesson = {
             audio_text: "He eats meat.",
             skill: "third_person",
             difficulty: 2
+        },
+        // NOVO: Listening + Reordenação
+        {
+            id: "ex_1_3",
+            type: "listening",
+            instruction: "Ouça a frase e organize as palavras na ordem correta:",
+            options: ["water", "drink", "I"],
+            correct_answer: ["I", "drink", "water"],
+            audio_text: "I drink water.",
+            skill: "listening_syntax",
+            difficulty: 2
+        },
+        // NOVO: Listening + Múltipla Escolha (tradução)
+        {
+            id: "ex_1_4",
+            type: "multiple_choice",
+            instruction: "🎧 Você ouvirá uma frase em inglês. Preste atenção e escolha a tradução em português que corresponde EXATAMENTE ao que você escutou.",
+            options: ["Eu como peixe.", "Eu bebo água.", "Eu falo inglês."],
+            correct_answer: "Eu bebo água.",
+            audio_text: "I drink water.",
+            skill: "listening_comprehension",
+            difficulty: 2
         }
     ]
 };
@@ -222,6 +244,28 @@ export const mockLesson13: Lesson = {
             audio_text: "They aren't at the party.",
             skill: "to_be_negative_plural",
             difficulty: 2
+        },
+        // NOVO: Listening + Reordenação
+        {
+            id: "ex_13_4",
+            type: "listening",
+            instruction: "Ouça a frase e organize as palavras na ordem correta:",
+            options: ["happy", "is", "She"],
+            correct_answer: ["She", "is", "happy"],
+            audio_text: "She is happy.",
+            skill: "listening_syntax",
+            difficulty: 2
+        },
+        // NOVO: Listening + Múltipla Escolha
+        {
+            id: "ex_13_5",
+            type: "multiple_choice",
+            instruction: "🎧 Atenção: ouça a frase com cuidado. Ela descreve um estado ou localização. Escolha a tradução em português que corresponde EXATAMENTE ao que você escutou.",
+            options: ["Ela está feliz.", "Ela não está feliz.", "Ela está em casa."],
+            correct_answer: "Ela está feliz.",
+            audio_text: "She is happy.",
+            skill: "listening_comprehension",
+            difficulty: 2
         }
     ]
 };
@@ -339,6 +383,28 @@ export const mockLesson17: Lesson = {
             audio_text: "spoke",
             skill: "past_irregular",
             difficulty: 2
+        },
+        // NOVO: Listening + Reordenação
+        {
+            id: "ex_17_4",
+            type: "listening",
+            instruction: "Ouça a frase no passado e organize as palavras:",
+            options: ["to", "finish", "didn't", "I", "need"],
+            correct_answer: ["I", "didn't", "need", "to", "finish"],
+            audio_text: "I didn't need to finish.",
+            skill: "listening_past",
+            difficulty: 3
+        },
+        // NOVO: Listening + Múltipla Escolha
+        {
+            id: "ex_17_5",
+            type: "multiple_choice",
+            instruction: "🎧 Você ouvirá uma frase no PASSADO. Preste atenção se a ação aconteceu ou não aconteceu. Escolha a tradução em português que corresponde EXATAMENTE ao que você escutou.",
+            options: ["Eu precisei terminar.", "Eu não precisei terminar.", "Eu vou precisar terminar."],
+            correct_answer: "Eu não precisei terminar.",
+            audio_text: "I didn't need to finish.",
+            skill: "listening_past_comprehension",
+            difficulty: 3
         }
     ]
 };
@@ -461,6 +527,28 @@ export const mockLesson21: Lesson = {
             audio_text: "I won't wear the pink dress.",
             skill: "future_negative",
             difficulty: 2
+        },
+        // NOVO: Listening + Reordenação
+        {
+            id: "ex_21_4",
+            type: "listening",
+            instruction: "Ouça a frase no futuro e organize as palavras:",
+            options: ["the", "will", "pay", "bill", "She", "tomorrow"],
+            correct_answer: ["She", "will", "pay", "the", "bill", "tomorrow"],
+            audio_text: "She will pay the bill tomorrow.",
+            skill: "listening_future",
+            difficulty: 3
+        },
+        // NOVO: Listening + Múltipla Escolha
+        {
+            id: "ex_21_5",
+            type: "multiple_choice",
+            instruction: "🎧 Você ouvirá uma frase no FUTURO. Preste atenção nos detalhes (quem, o quê, quando). Escolha a tradução em português que corresponde EXATAMENTE ao que você escutou.",
+            options: ["Ela vai pagar a conta amanhã.", "Ela pagou a conta ontem.", "Ela não vai pagar a conta."],
+            correct_answer: "Ela vai pagar a conta amanhã.",
+            audio_text: "She will pay the bill tomorrow.",
+            skill: "listening_future_comprehension",
+            difficulty: 3
         }
     ]
 };
@@ -585,6 +673,27 @@ export const mockLesson26: Lesson = {
             correct_answer: ["I", "am", "reading", "a", "book"],
             audio_text: "I am reading a book.",
             skill: "present_continuous_syntax",
+            difficulty: 2
+        },// NOVO: Listening + Reordenação
+        {
+            id: "ex_26_4",
+            type: "listening",
+            instruction: "Ouça a frase e organize as palavras:",
+            options: ["a", "reading", "am", "book", "I"],
+            correct_answer: ["I", "am", "reading", "a", "book"],
+            audio_text: "I am reading a book.",
+            skill: "listening_continuous",
+            difficulty: 2
+        },
+        // NOVO: Listening + Múltipla Escolha
+        {
+            id: "ex_26_5",
+            type: "multiple_choice",
+            instruction: "🎧 Você ouvirá uma frase sobre uma ação que está ACONTECENDO AGORA. Preste atenção na forma do verbo (-ing). Escolha a tradução em português que corresponde EXATAMENTE ao que você escutou.",
+            options: ["Eu estou lendo um livro.", "Eu li um livro.", "Eu vou ler um livro."],
+            correct_answer: "Eu estou lendo um livro.",
+            audio_text: "I am reading a book.",
+            skill: "listening_continuous_comprehension",
             difficulty: 2
         }
     ]
