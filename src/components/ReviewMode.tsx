@@ -40,6 +40,7 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
     const [reorderSelection, setReorderSelection] = useState<string[]>([]);
     const [isAnswered, setIsAnswered] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
+    const [answerResults, setAnswerResults] = useState<Record<number, boolean>>({});
 
     const currentExercise = reviewExercises[currentIndex];
 
@@ -73,7 +74,11 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
         } else {
             isCorrect = selectedOption === currentExercise.correct_answer;
         }
-
+        // ✅ REGISTRA O RESULTADO INDIVIDUAL
+        setAnswerResults(prev => ({
+            ...prev,
+            [currentIndex]: isCorrect
+        }));
         if (isCorrect) {
             setScore(prev => prev + 1);
             if (currentExercise.audio_text) {
@@ -95,25 +100,25 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
 
     const finishReview = () => {
         setIsFinished(true);
-        // Atualiza o progresso de cada lição fraca
-        const weakLessons = lessons.filter(
-            lesson => progress[lesson.id] && !progress[lesson.id].completed
-        );
-        weakLessons.forEach(lesson => {
-            const lessonExercises = reviewExercises.filter(ex => ex.lessonId === lesson.id);
-            const lessonCorrect = reviewExercises
-                .filter((ex, idx) => {
-                    if (ex.lessonId !== lesson.id) return false;
-                    // Verifica se o aluno acertou (simplificado)
-                    return idx < currentIndex + 1;
-                }).length;
 
-            if (lessonExercises.length > 0) {
-                updateProgress(lesson.id, lessonCorrect, lessonExercises.length);
+        // ✅ Calcula o desempenho REAL por lição
+        const lessonResults: Record<string, { correct: number; total: number }> = {};
+
+        reviewExercises.forEach((ex, idx) => {
+            if (!lessonResults[ex.lessonId]) {
+                lessonResults[ex.lessonId] = { correct: 0, total: 0 };
+            }
+            lessonResults[ex.lessonId].total += 1;
+            if (answerResults[idx]) {
+                lessonResults[ex.lessonId].correct += 1;
             }
         });
-    };
 
+        // ✅ Atualiza o progresso de cada lição individualmente
+        Object.entries(lessonResults).forEach(([lessonId, result]) => {
+            updateProgress(lessonId, result.correct, result.total);
+        });
+    };
     // --- Tela: Sem lições para revisar ---
     if (reviewExercises.length === 0) {
         return (
@@ -135,50 +140,93 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
     // --- Tela: Resultado Final ---
     if (isFinished) {
         const percentage = Math.round((score / reviewExercises.length) * 100);
+
+        // Agrupa os resultados por lição para exibir o detalhamento
+        const lessonPerformance = reviewExercises.reduce((acc, ex, idx) => {
+            if (!acc[ex.lessonTitle]) {
+                acc[ex.lessonTitle] = { correct: 0, total: 0 };
+            }
+            acc[ex.lessonTitle].total += 1;
+            if (answerResults[idx]) {
+                acc[ex.lessonTitle].correct += 1;
+            }
+            return acc;
+        }, {} as Record<string, { correct: number; total: number }>);
+
         return (
-            <div className="bg-soul-gray border border-gray-800 rounded-xl p-8 text-center mt-8">
-                <h3 className="text-2xl font-bold text-soul-gold mb-4">🔄 Revisão Concluída!</h3>
-                <p className="text-gray-300 mb-2">Você acertou:</p>
-                <div className="text-5xl font-extrabold text-white mb-6">
-                    {score} <span className="text-2xl text-gray-500">/ {reviewExercises.length}</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-4 mb-6">
-                    <div
-                        className={`h-4 rounded-full transition-all duration-500 ${
-                            percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${percentage}%` }}
-                    ></div>
-                </div>
-                <p className="text-gray-400 mb-6 italic">
-                    {percentage >= 80
-                        ? "Excelente revisão! Suas lições fracas estão melhorando."
-                        : "Continue revisando. A repetição é a chave da fluência."}
-                </p>
-                <div className="flex gap-4 justify-center">
-                    <button
-                        onClick={onExit}
-                        className="bg-soul-gold text-soul-dark font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all"
-                    >
-                        Voltar ao Dashboard
-                    </button>
-                    {percentage < 80 && (
+            <>
+                <div className="bg-soul-gray border border-gray-800 rounded-xl p-8 text-center mt-8">
+                    <h3 className="text-2xl font-bold text-soul-gold mb-4">🔄 Revisão Concluída!</h3>
+                    <p className="text-gray-300 mb-2">Você acertou:</p>
+                    <div className="text-5xl font-extrabold text-white mb-6">
+                        {score} <span className="text-2xl text-gray-500">/ {reviewExercises.length}</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-4 mb-6">
+                        <div
+                            className={`h-4 rounded-full transition-all duration-500 ${
+                                percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
+                            style={{ width: `${percentage}%` }}
+                        ></div>
+                    </div>
+                    <p className="text-gray-400 mb-6 italic">
+                        {percentage >= 80
+                            ? "Excelente revisão! Suas lições fracas estão melhorando."
+                            : "Continue revisando. A repetição é a chave da fluência."}
+                    </p>
+                    <div className="flex gap-4 justify-center">
                         <button
-                            onClick={() => {
-                                setCurrentIndex(0);
-                                setScore(0);
-                                setSelectedOption(null);
-                                setReorderSelection([]);
-                                setIsAnswered(false);
-                                setIsFinished(false);
-                            }}
-                            className="bg-soul-dark border border-soul-gold text-soul-gold font-bold py-3 px-8 rounded-lg hover:bg-soul-gold hover:text-soul-dark transition-all"
+                            onClick={onExit}
+                            className="bg-soul-gold text-soul-dark font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all"
                         >
-                            Revisar Novamente
+                            Voltar ao Dashboard
                         </button>
-                    )}
+                        {percentage < 80 && (
+                            <button
+                                onClick={() => {
+                                    setCurrentIndex(0);
+                                    setScore(0);
+                                    setSelectedOption(null);
+                                    setReorderSelection([]);
+                                    setIsAnswered(false);
+                                    setIsFinished(false);
+                                    // Opcional: embaralhar novamente para variar a ordem
+                                }}
+                                className="bg-soul-dark border border-soul-gold text-soul-gold font-bold py-3 px-8 rounded-lg hover:bg-soul-gold hover:text-soul-dark transition-all"
+                            >
+                                Revisar Novamente
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
+
+                {/* ✅ NOVO: Desempenho detalhado por lição */}
+                <div className="bg-soul-gray border border-gray-800 rounded-xl p-6 mt-6">
+                    <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 text-center">
+                        Desempenho Detalhado por Lição
+                    </h4>
+                    <div className="space-y-2">
+                        {Object.entries(lessonPerformance).map(([lessonTitle, result]) => {
+                            const pct = Math.round((result.correct / result.total) * 100);
+                            return (
+                                <div
+                                    key={lessonTitle}
+                                    className="flex justify-between items-center bg-soul-dark border border-gray-700 rounded-lg px-4 py-3"
+                                >
+                                    <span className="text-gray-300 text-sm font-medium">{lessonTitle}</span>
+                                    <span
+                                        className={`font-bold text-sm ${
+                                            pct >= 80 ? 'text-green-400' : pct >= 50 ? 'text-yellow-400' : 'text-red-400'
+                                        }`}
+                                    >
+                    {result.correct}/{result.total} ({pct}%)
+                  </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </>
         );
     }
 
