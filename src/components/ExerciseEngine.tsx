@@ -148,15 +148,32 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
                         {reorderSelection.length === 0 ? (
                             <span className="text-gray-600 italic text-sm">Clique nas palavras abaixo para montar a frase...</span>
                         ) : (
-                            reorderSelection.map((word, idx) => (
-                                <button
-                                    key={`ans-${idx}`}
-                                    onClick={() => handleReorderClick(word)}
-                                    className="bg-soul-gold text-soul-dark font-bold px-4 py-2 rounded-md hover:opacity-90 transition-all"
-                                >
-                                    {word}
-                                </button>
-                            ))
+                            reorderSelection.map((word, idx) => {
+                                // Feedback visual após verificar
+                                let wordClass = "bg-soul-gold text-soul-dark font-bold px-4 py-2 rounded-md hover:opacity-90 transition-all";
+
+                                if (isAnswered) {
+                                    const correctAnswer = currentExercise.correct_answer as string[];
+                                    const isCorrectPosition = correctAnswer[idx] === word;
+
+                                    if (isCorrectPosition) {
+                                        wordClass = "bg-green-600 text-white font-bold px-4 py-2 rounded-md";
+                                    } else {
+                                        wordClass = "bg-red-600 text-white font-bold px-4 py-2 rounded-md";
+                                    }
+                                }
+
+                                return (
+                                    <button
+                                        key={`ans-${idx}`}
+                                        onClick={() => !isAnswered && handleReorderClick(word)}
+                                        disabled={isAnswered}
+                                        className={wordClass}
+                                    >
+                                        {word}
+                                    </button>
+                                );
+                            })
                         )}
                     </div>
 
@@ -168,7 +185,7 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
                                 <button
                                     key={`pool-${idx}`}
                                     onClick={() => handleReorderClick(word)}
-                                    disabled={isUsed}
+                                    disabled={isUsed || isAnswered}
                                     className={`px-4 py-2 rounded-md border transition-all ${
                                         isUsed
                                             ? 'bg-gray-800 border-gray-700 text-gray-600 cursor-not-allowed opacity-50'
@@ -180,8 +197,29 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
                             );
                         })}
                     </div>
+
+                    {/* Mensagem de Feedback após verificar */}
+                    {isAnswered && (
+                        <div className={`mt-6 p-4 rounded-lg border-2 ${
+                            JSON.stringify(reorderSelection) === JSON.stringify(currentExercise.correct_answer)
+                                ? 'bg-green-900/20 border-green-500 text-green-400'
+                                : 'bg-red-900/20 border-red-500 text-red-400'
+                        }`}>
+                            <div className="font-bold text-lg mb-2">
+                                {JSON.stringify(reorderSelection) === JSON.stringify(currentExercise.correct_answer)
+                                    ? '✅ Correto!'
+                                    : '❌ Incorreto'}
+                            </div>
+                            <div className="text-sm">
+                                <span className="font-semibold">Ordem correta:</span>{' '}
+                                {(currentExercise.correct_answer as string[]).join(' ')}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
+
+
 
             {/* Área de Interação: MÚLTIPLA ESCOLHA */}
             {!isReorder && (

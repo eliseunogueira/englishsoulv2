@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { mockLessons } from '../data/mockLessons';
 import { LessonCard } from '../components/LessonCard';
+import { ProgressDashboard } from '../components/ProgressDashboard';
 
 export function LessonListPage() {
     const { lessons, setLessons, setCurrentLesson } = useAppStore();
@@ -28,6 +29,8 @@ export function LessonListPage() {
             </header>
 
             <main className="max-w-5xl mx-auto">
+                {/* ✅ DASHBOARD DE PROGRESSO */}
+                <ProgressDashboard />
                 <div className="mb-6">
                     <h2 className="text-2xl font-semibold text-white mb-2">Stress Test do Modelo</h2>
                     <p className="text-gray-400 text-sm">
