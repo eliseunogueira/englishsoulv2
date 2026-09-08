@@ -1,12 +1,20 @@
 // src/components/ProgressDashboard.tsx
+import { useState } from 'react'; // ✅ Adicione useState
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
+import { ReviewMode } from './ReviewMode'; // ✅ Importe o ReviewMode
 import type { Lesson } from '../types/lesson';
 
 export function ProgressDashboard() {
     const { lessons, progress, setCurrentLesson } = useAppStore();
     const navigate = useNavigate();
+// ✅ Estado para controlar o Modo Revisão
+    const [isReviewMode, setIsReviewMode] = useState(false);
 
+    // ✅ Se estiver no Modo Revisão, renderiza o ReviewMode
+    if (isReviewMode) {
+        return <ReviewMode onExit={() => setIsReviewMode(false)} />;
+    }
     // Cálculos de estatísticas
     const totalLessons = lessons.length;
     const completedLessons = Object.values(progress).filter(p => p.completed).length;
@@ -115,10 +123,10 @@ export function ProgressDashboard() {
                     </button>
                 )}
 
-                {/* Revisão (placeholder para futura feature) */}
                 <button
+                    onClick={() => setIsReviewMode(true)}
                     disabled={strugglingLessons.length === 0}
-                    className="bg-soul-dark border border-gray-700 text-gray-300 font-bold py-4 px-6 rounded-lg hover:border-soul-gold hover:text-soul-gold transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-soul-dark border border-purple-500/50 text-purple-300 font-bold py-4 px-6 rounded-lg hover:border-purple-400 hover:text-purple-200 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <div className="text-xs uppercase tracking-wider mb-1 opacity-75">
                         Modo Revisão
@@ -129,7 +137,7 @@ export function ProgressDashboard() {
                             : 'Nenhuma revisão necessária'}
                     </div>
                     <div className="text-xs mt-1 opacity-75">
-                        Em breve: Repetição Espaçada
+                        Exercícios misturados das lições fracas
                     </div>
                 </button>
             </div>
