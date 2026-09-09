@@ -11,44 +11,25 @@ export const mockLesson1: Lesson = {
     description: "O esqueleto básico de 90% das frases em inglês.",
     semantic_field: "CASA E FAMÍLIA",
 
+    // Lição 1 - inventory
     inventory: {
         subjects: ["I", "You", "He", "She", "It", "We", "They"],
-        auxiliaries: ["DO", "DON'T", "DOES", "DOESN'T"],
+        auxiliaries: ["DO", "DOES", "DON'T", "DOESN'T"], // ✅ Deve existir
         verbs: [
-            {
-                base: "eat",
-                past: "ate",
-                valid_complements: ["fish", "meat", "breakfast", "lunch", "dinner"],
-                valid_complement_types: ["object"]
-            },
-            {
-                base: "drink",
-                past: "drank",
-                valid_complements: ["water", "coffee", "beer", "juice", "milk", "wine"],
-                valid_complement_types: ["object"]
-            },
-            {
-                base: "speak",
-                past: "spoke",
-                valid_complements: ["english", "portuguese", "spanish"],
-                valid_complement_types: ["object"]
-            },
-            {
-                base: "need",
-                past: "needed",
-                valid_complements: ["water", "milk", "my family", "my brother", "to speak english"],
-                valid_complement_types: ["object", "infinitive"],
-                special_rules: { requires_to: true }
-            }
+            { base: "eat", valid_complements: ["fish", "meat", "the food"], valid_complement_types: ["object"] },
+            { base: "drink", valid_complements: ["water", "coffee", "beer", "juice"], valid_complement_types: ["object"] },
+            { base: "speak", valid_complements: ["english", "portuguese", "with you", "with my family"], valid_complement_types: ["object", "preposition"] },
+            { base: "need", valid_complements: ["to go", "to finish", "help"], valid_complement_types: ["infinitive", "object"] }
         ],
-        complements: ["fish", "meat", "water", "coffee", "beer", "juice", "english", "portuguese", "my family", "my brother"],
-        modifiers: ["now", "today", "with you", "with my family"]
+        complements: ["fish", "meat", "water", "coffee", "beer", "juice", "english", "portuguese", "my family", "my brother", "the food", "to go", "to finish", "help", "with you", "with my family"],
+        modifiers: ["now", "today"]
     },
-
     frame_recipe: [
         { id: "subject", accepts: "subject", label: "Subject", position: 0 },
-        { id: "verb", accepts: "main_verb", label: "Verb", position: 1 },
-        { id: "object", accepts: "complement", label: "Object", position: 2 }
+        { id: "auxiliary", accepts: "auxiliary", label: "DO/DOES", position: 1, isOptional: true }, // ✅ NOVO
+        { id: "verb", accepts: "main_verb", label: "Verb", position: 2 },
+        { id: "complement", accepts: "complement", label: "Object", position: 3 },
+        { id: "modifier", accepts: "modifier", label: "Time", position: 4, isOptional: true } // ✅ NOVO
     ],
 
     sentences: [
