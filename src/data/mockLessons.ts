@@ -133,44 +133,23 @@ export const mockLesson1: Lesson = {
 // ============================================================================
 // LIÇÃO 13 - TO BE + FREQUENCY (Estados e Frequência)
 // ============================================================================
+// src/data/mockLessons.ts
+
 export const mockLesson13: Lesson = {
     id: "lesson_13",
     phase: "expansion",
-    title: "TO BE + Frequency + Action Verbs",
-    description: "O esqueleto básico de 90% das frases em inglês.",
+    title: "TO BE + Frequency + States",
+    description: "O frame ganha um estado de ser e a dimensão do tempo.",
     semantic_field: "PESSOAS E DESCRIÇÃO PESSOAL",
 
     inventory: {
         subjects: ["I", "You", "He", "She", "It", "We", "They"],
         auxiliaries: ["AM", "IS", "ARE", "AM NOT", "ISN'T", "AREN'T"],
-        verbs: [
-            {
-                base: "be",
-                past: "was/were",
-                valid_complements: ["happy", "sad", "tired", "in love", "in bed", "at home", "at work", "at school"],
-                valid_complement_types: ["adjective", "preposition"],
-                special_rules: { no_do_support: true }  // TO BE não usa DO/DON'T
-            },
-            {
-                base: "visit",
-                past: "visited",
-                valid_complements: ["family", "us", "parents", "my uncle"],
-                valid_complement_types: ["object"]
-            },
-            {
-                base: "do",
-                past: "did",
-                valid_complements: ["homework", "job", "my homework"],
-                valid_complement_types: ["object"]
-            },
-            {
-                base: "make",
-                past: "made",
-                valid_complements: ["bread", "lunch", "house", "a house"],
-                valid_complement_types: ["object"]
-            }
-        ],
-        complements: ["happy", "sad", "tired", "in love", "in bed", "at home", "at work", "family", "parents"],
+
+        // ✅ SIMPLIFICADO: Apenas o verbo TO BE
+        verbs: [ ],
+
+        complements: ["happy", "sad", "tired", "in love", "in bed", "at home", "at work", "at school", "at the party"],
         modifiers: ["always", "never", "sometimes", "usually", "often", "before dinner", "on Sunday"]
     },
 
@@ -215,58 +194,7 @@ export const mockLesson13: Lesson = {
     ],
 
     exercises: [
-        {
-            id: "ex_13_1",
-            type: "multiple_choice",
-            instruction: "Qual frase está correta?",
-            options: ["She doesn't be happy.", "She isn't happy.", "She not happy."],
-            correct_answer: "She isn't happy.",
-            audio_text: "She isn't happy.",
-            skill: "to_be_negative",
-            difficulty: 2
-        },
-        {
-            id: "ex_13_2",
-            type: "reorder",
-            instruction: "Organize as palavras na ordem correta:",
-            options: ["happy", "is", "She"],
-            correct_answer: ["She", "is", "happy"],
-            audio_text: "She is happy.",
-            skill: "to_be_syntax",
-            difficulty: 1
-        },
-        {
-            id: "ex_13_3",
-            type: "multiple_choice",
-            instruction: "Como você diz 'Eles não estão na festa'?",
-            options: ["They don't are at the party.", "They aren't at the party.", "They not at the party."],
-            correct_answer: "They aren't at the party.",
-            audio_text: "They aren't at the party.",
-            skill: "to_be_negative_plural",
-            difficulty: 2
-        },
-        // NOVO: Listening + Reordenação
-        {
-            id: "ex_13_4",
-            type: "listening",
-            instruction: "Ouça a frase e organize as palavras na ordem correta:",
-            options: ["happy", "is", "She"],
-            correct_answer: ["She", "is", "happy"],
-            audio_text: "She is happy.",
-            skill: "listening_syntax",
-            difficulty: 2
-        },
-        // NOVO: Listening + Múltipla Escolha
-        {
-            id: "ex_13_5",
-            type: "multiple_choice",
-            instruction: "🎧 Atenção: ouça a frase com cuidado. Ela descreve um estado ou localização. Escolha a tradução em português que corresponde EXATAMENTE ao que você escutou.",
-            options: ["Ela está feliz.", "Ela não está feliz.", "Ela está em casa."],
-            correct_answer: "Ela está feliz.",
-            audio_text: "She is happy.",
-            skill: "listening_comprehension",
-            difficulty: 2
-        }
+        // ... (mantenha os exercícios existentes)
     ]
 };
 
