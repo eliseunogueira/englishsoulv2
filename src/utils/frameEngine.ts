@@ -48,6 +48,11 @@ export class FrameEngine {
             const isHaveHas = ['have', 'has'].includes(auxiliary);
             const hasOtherAuxiliary = auxiliary && !isToBe && !isHaveHas;
 
+            // Adicione esta verificação:
+            const isLesson17 = lesson.id === 'lesson_17';
+            const isPastTense = isLesson17 && !auxiliary; // Lição 17 sem auxiliar = passado
+
+
             if (isToBe) {
                 result.displayTexts['verb'] = verbObj?.ing || GrammarEngine.getIngForm(state.verb);
                 result.suffixes['verb'] = 'ing';
@@ -57,7 +62,15 @@ export class FrameEngine {
             } else if (hasOtherAuxiliary) {
                 result.displayTexts['verb'] = state.verb;
                 result.suffixes['verb'] = '';
-            } else if (['he', 'she', 'it'].includes(subject)) {
+            }
+            else if (isPastTense) {
+                // ✅ NOVO: Lição 17 sem auxiliar = conjugar no passado
+                result.displayTexts['verb'] = verbObj?.past || (state.verb.endsWith('e') ? state.verb + 'd' : state.verb + 'ed');
+                result.suffixes['verb'] = 'past';
+            }
+
+
+            else if (['he', 'she', 'it'].includes(subject)) {
                 const conjugated = GrammarEngine.conjugate(state.verb, 'present', subject);
                 result.displayTexts['verb'] = conjugated;
                 result.suffixes['verb'] = conjugated !== state.verb ? 's' : '';
@@ -84,21 +97,26 @@ export class FrameEngine {
                 }
             }
         }
+        // 4. Montagem da Frase de Áudio (Dinâmica baseada no frame_recipe)
+        const audioParts: string[] = [];
 
-        // 4. Montagem da Frase de Áudio
-        const audioParts = [];
+        // O segredo: usamos a ordem exata do frame_recipe da lição!
+        lesson.frame_recipe.forEach(slot => {
+            const slotId = slot.id as keyof FrameState;
+            const value = state[slotId];
 
-        if (state.subject) audioParts.push(state.subject);
-        if (state.auxiliary) audioParts.push(state.auxiliary);
-
-        // ✅ CORREÇÃO: Modifier vem ANTES do complement (com TO BE)
-        if (state.modifier) audioParts.push(state.modifier);
-
-        if (state.verb && result.displayTexts['verb']) {
-            audioParts.push(result.displayTexts['verb']);
-        }
-
-        if (state.complement) audioParts.push(state.complement);
+            // Se o slot estiver preenchido
+            if (value) {
+                // Se for o slot do verbo, usamos a forma transformada (ex: "spoke", "reading", "drinks")
+                if (slotId === 'verb' && result.displayTexts['verb']) {
+                    audioParts.push(result.displayTexts['verb']);
+                }
+                // Para todos os outros slots (sujeito, auxiliar, complemento, modificador), usamos o valor original
+                else {
+                    audioParts.push(value);
+                }
+            }
+        });
 
         result.audioText = audioParts.join(' ');
 

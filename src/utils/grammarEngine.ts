@@ -6,7 +6,10 @@ export class GrammarEngine {
     private static irregulars: Record<string, Record<string, string>> = {
         'be': { 'i': 'am', 'he': 'is', 'she': 'is', 'it': 'is', 'we': 'are', 'you': 'are', 'they': 'are' },
         'have': { 'he': 'has', 'she': 'has', 'it': 'has' },
-        'do': { 'he': 'does', 'she': 'does', 'it': 'does' }
+        'do': { 'he': 'does', 'she': 'does', 'it': 'does' },
+        'speak': { 'past': 'spoke' },
+        'eat': { 'past': 'ate' },
+        'drink': { 'past': 'drank' }
     };
 
     /**
@@ -19,6 +22,20 @@ export class GrammarEngine {
         // Se não for 3ª pessoa do singular, o verbo no presente fica na base
         if (tense === 'present' && !isThirdPerson) {
             return verb;
+        }
+
+        //se esta no passado
+        if (tense === 'past') {
+            // Verifica irregulares
+            if (this.irregulars[verb]?.past) {
+                return this.irregulars[verb].past;
+            }
+            // Regulares: adiciona "ed"
+            if (verb.endsWith('e')) return verb + 'd';
+            if (verb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(verb[verb.length - 2])) {
+                return verb.slice(0, -1) + 'ied';
+            }
+            return verb + 'ed';
         }
 
         // 1. Verifica irregulares (TO BE, HAVE, DO)

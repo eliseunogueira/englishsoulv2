@@ -237,15 +237,17 @@ export const mockLesson17: Lesson = {
                 valid_complement_types: ["object"]
             }
         ],
-        complements: ["to finish", "to go", "beer", "juice", "turkey", "fish", "the food"],
+        complements: ["to finish", "to go", "beer", "juice", "turkey", "fish", "the food","to your father", "at the meeting", "english"],
         modifiers: ["yesterday", "last night", "already", "all day", "day before yesterday"]
     },
 
+    // Lição 17
     frame_recipe: [
         { id: "subject", accepts: "subject", label: "Subject", position: 0 },
         { id: "auxiliary", accepts: "auxiliary", label: "DID/DIDN'T", position: 1, isOptional: true },
         { id: "verb", accepts: "main_verb", label: "Verb", position: 2 },
-        { id: "complement", accepts: "complement", label: "Object/Infinitive", position: 3 }
+        { id: "complement", accepts: "complement", label: "Object/Infinitive", position: 3 },
+        { id: "modifier", accepts: "modifier", label: "Time", position: 4, isOptional: true } // ✅ NOVO
     ],
 
     sentences: [
