@@ -10,6 +10,7 @@ export const mockLesson1: Lesson = {
     title: "The Basics of a Sentence",
     description: "O esqueleto básico de 90% das frases em inglês.",
     semantic_field: "CASA E FAMÍLIA",
+    default_tense: "present",
 
     // Lição 1 - inventory
     inventory: {
@@ -122,6 +123,7 @@ export const mockLesson13: Lesson = {
     title: "TO BE + Frequency + States",
     description: "O frame ganha um estado de ser e a dimensão do tempo.",
     semantic_field: "PESSOAS E DESCRIÇÃO PESSOAL",
+    default_tense: "present", // ✅ TO BE é tratado como presente
 
     inventory: {
         subjects: ["I", "You", "He", "She", "It", "We", "They"],
@@ -237,6 +239,7 @@ export const mockLesson17: Lesson = {
     title: "The Past Simple — DID & DIDN'T",
     description:"Lição 17 - Past Simple (DID) - Auxiliares no passado",
     semantic_field: "EXPERIÊNCIAS PASSADAS",
+    default_tense: "past", // ✅ Agora o engine sabe que é passado sem precisar do ID
 
     inventory: {
         subjects: ["I", "You", "He", "She", "It", "We", "They"],
@@ -388,28 +391,28 @@ export const mockLesson21: Lesson = {
                 past: "paid",
                 valid_complements: ["the bill", "the money", "you"],
                 valid_complement_types: ["object"],
-                special_rules: { invariant: true }  // WILL não muda
+
             },
             {
                 base: "wear",
                 past: "wore",
                 valid_complements: ["this shirt", "a pink dress", "the suit"],
                 valid_complement_types: ["object"],
-                special_rules: { invariant: true }
+
             },
             {
                 base: "sing",
                 past: "sang",
                 valid_complements: ["at the party", "in the bathroom", "a song"],
                 valid_complement_types: ["preposition", "object"],
-                special_rules: { invariant: true }
+
             },
             {
                 base: "ride",
                 past: "rode",
                 valid_complements: ["their bikes", "your horse", "the bike"],
                 valid_complement_types: ["object"],
-                special_rules: { invariant: true }
+
             }
         ],
         complements: ["the bill", "a pink dress", "at the party", "their bikes", "your horse"],
@@ -522,6 +525,7 @@ export const mockLesson26: Lesson = {
     title: "The -ING Form, TOO & The Present Perfect",
     description: "Lição 26 - -ING + Present Perfect como CHUNK - Peças compostas",
     semantic_field: "AÇÃO EM PROGRESSO E EXPERIÊNCIA",
+    default_tense: "continuous", // ✅ Ou perfect, dependendo do foco
 
     inventory: {
         subjects: ["I", "You", "He", "She", "It", "We", "They"],
@@ -534,7 +538,7 @@ export const mockLesson26: Lesson = {
                 ing: "reading",
                 valid_complements: ["a book", "the newspaper", "this"],
                 valid_complement_types: ["object"],
-                special_rules: { invariant: false }
+
             },
             {
                 base: "cook",
@@ -543,7 +547,7 @@ export const mockLesson26: Lesson = {
                 ing: "cooking",
                 valid_complements: ["dinner", "beans", "lunch"],
                 valid_complement_types: ["object"],
-                special_rules: { invariant: false }
+
             },
             {
                 base: "be",

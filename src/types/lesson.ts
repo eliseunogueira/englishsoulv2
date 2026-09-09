@@ -1,109 +1,91 @@
 // src/types/lesson.ts
 
-// ============================================================================
-// TEORIA UNIFICADA DAS PEÇAS DO ENGLISH SOUL
-// ============================================================================
+/**
+ * Tipos de interação disponíveis no motor de exercícios.
+ */
+export type ExerciseType = 'multiple_choice' | 'reorder' | 'listening';
 
-// 1. Tipos Atômicos de Peças (Tudo no curso é uma dessas peças)
-export type PieceType =
-    | 'subject'       // I, You, He, She, We, They
-    | 'auxiliary'     // DO, DOES, DID, WILL, TO BE, CAN, COULD, SHOULD, WOULD
-    | 'main_verb'     // eat, drink, be, go, speak
-    | 'complement'    // fish, happy, at home, in love, to finish (objetos, estados, infinitivos)
-    | 'modifier';     // always, yesterday, by myself, tomorrow, too much
-
-// 2. Categorias de Complementos (O que cada verbo aceita)
-export type ComplementType =
-    | 'object'        // fish, water, book (recebe ação)
-    | 'adjective'     // happy, sad, tired (estado)
-    | 'preposition'   // at home, in love, on Sunday (locativo/temporal)
-    | 'infinitive'    // to finish, to go, to speak (ação futura)
-    | 'gerund';       // swimming, reading (ação em progresso)
-
-// 3. O Verbo Polimórfico (Tem múltiplas formas e regras)
+/**
+ * Interface de um Verbo.
+ * A fonte da verdade para formas irregulares está aqui, não no GrammarEngine.
+ */
 export interface Verb {
-    base: string;           // eat
-    past?: string;          // ate
-    participle?: string;    // eaten (para perfect)
-    ing?: string;           // eating (para continuous)
-
-    // O que essa peça aceita no slot de complemento?
-    valid_complements: string[];
-    valid_complement_types: ComplementType[];
-
-    // Regras especiais (TO BE não usa DO/DON'T, WILL é invariante, etc.)
+    base: string; // Ex: "drink", "speak", "be"
+    past?: string; // Ex: "drank", "spoke", "was/were"
+    participle?: string; // Ex: "drunk", "spoken", "been"
+    ing?: string; // Ex: "drinking", "speaking", "being"
+    valid_complements: string[]; // Ex: ["water", "coffee", "all"]
+    valid_complement_types: string[]; // Ex: ["object", "preposition"]
     special_rules?: {
-        no_do_support?: boolean;      // TO BE, CAN, WILL, SHOULD, WOULD
-        invariant?: boolean;          // WILL, CAN, SHOULD, WOULD (não muda com sujeito)
-        requires_to?: boolean;        // Verbos que exigem TO antes do próximo verbo
+        no_do_support?: boolean; // Ex: true para o verbo TO BE
     };
 }
 
-// 4. O Frame agora é uma "Receita de Slots" (Dinâmico)
+/**
+ * Interface de um Slot do Frame (a receita da frase).
+ */
 export interface FrameSlot {
-    id: string;
-    accepts: PieceType;
-    label: string;              // "Subject", "Auxiliary", "Verb", "Object"
-    isOptional?: boolean;       // Auxiliares só aparecem em negativa/pergunta
-    position?: number;          // Ordem na frase (0, 1, 2, 3...)
+    id: string; // Ex: "subject", "auxiliary", "verb"
+    accepts: string; // Ex: "subject", "auxiliary", "main_verb"
+    label: string; // Ex: "Sujeito", "TO BE", "Verbo"
+    position: number;
+    isOptional?: boolean; // Ex: true para modificadores de tempo/frequência
 }
 
-// 5. Exercícios com metadados pedagógicos
-export type ExerciseType = 'multiple_choice' | 'reorder' | 'fill_blank' | 'listening';
-
-
+/**
+ * Interface de um Exercício.
+ */
 export interface Exercise {
     id: string;
     type: ExerciseType;
     instruction: string;
-    question_text?: string;
     options: string[];
     correct_answer: string | string[];
-    audio_text?: string;
-    skill?: string;             // "syntax", "negative", "third_person", "semantic"
+    audio_text?: string; // O que o TTS deve falar (pode diferir do texto visual)
+    skill?: string; // Ex: "past_negative", "listening_comprehension"
     difficulty?: 1 | 2 | 3;
 }
 
-// 6. A Lição (O Contexto Completo)
+/**
+ * Interface Principal da Lição.
+ * Representa uma unidade completa de conhecimento do método English Soul.
+ */
 export interface Lesson {
     id: string;
     phase: 'foundation' | 'expansion' | 'complexity' | 'mastery';
     title: string;
-    description: string; // ✅ NOVO: A descrição que antes estava em concept
-    semantic_field: string;
-    chunks?: string[];
+    description: string;
+    semantic_field: string; // Ex: "PESSOAS E DESCRIÇÃO PESSOAL"
 
-    // O inventário de peças disponíveis nesta lição
+    // ✅ NOVO: Declara o tempo verbal padrão da lição (quando não há auxiliar).
+    // Isso evita que o FrameEngine precise saber o ID da lição (ex: isLesson17).
+    default_tense?: 'present' | 'past' | 'future' | 'continuous' | 'perfect';
+
     inventory: {
         subjects: string[];
-        auxiliaries: string[];      // ["DO", "DON'T", "DOES", "DOESN'T", "DID", "DIDN'T", "WILL", "WON'T"]
+        auxiliaries: string[];
         verbs: Verb[];
-        complements: string[];      // Todos os complementos válidos (objetos, adjetivos, preposições)
-        modifiers: string[];        // always, never, yesterday, tomorrow, by myself
+        complements: string[];
+        modifiers: string[];
     };
 
-    // A receita de como montar a frase (Frame dinâmico)
     frame_recipe: FrameSlot[];
-
-    // Exemplos estruturados (para áudio e contexto)
     sentences: {
         text: string;
         translation: string;
-        frame_parts: Record<string, string>;  // { subject: "I", auxiliary: "don't", verb: "eat", object: "fish" }
+        frame_parts: Record<string, string>;
     }[];
-
-    contexts: {
-        text: string;
-        translation: string;
-    }[];
-
-    // Regras gramaticais específicas desta lição
-    grammar_rules: {
-        rule: string;
-        pattern: string;
-        example: string;
-    }[];
-
-    // Exercícios (podem vir do backend ou estar pré-definidos)
+    contexts: { text: string; translation: string }[];
+    grammar_rules: { rule: string; pattern: string; example: string }[];
     exercises: Exercise[];
+}
+
+/**
+ * Interface para o progresso do aluno (usado no Zustand).
+ */
+export interface LessonProgress {
+    attempts: number;
+    bestScore: number;
+    completed: boolean;
+    lastAttempt?: string; // ISO date string
 }
