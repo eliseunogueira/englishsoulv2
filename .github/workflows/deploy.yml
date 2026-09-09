@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ] # Altere para 'master' se essa for sua branch principal
+    branches: [ main ] # ⚠️ Confirme se sua branch principal é 'main' ou 'master'
 
 permissions:
   contents: read
@@ -25,9 +25,10 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: package-lock.json # ✅ Mais explícito
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci # ✅ Correto (usa lockfile)
 
       - name: Build
         run: npm run build

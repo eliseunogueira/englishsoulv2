@@ -1,16 +1,16 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom'; // ✅ Troquei BrowserRouter por HashRouter
 import { LessonListPage } from './pages/LessonListPage';
 import { LessonViewPage } from './pages/LessonViewPage';
 
 function App() {
     return (
-        <BrowserRouter>
+        <HashRouter> {/* ✅ Troquei aqui também */}
             <Routes>
                 <Route path="/" element={<LessonListPage />} />
                 <Route path="/lesson/:id" element={<LessonViewPage />} />
             </Routes>
-        </BrowserRouter>
+        </HashRouter>
     );
 }
 
