@@ -71,6 +71,7 @@ export interface Lesson {
     title: string;
     description: string; // ✅ NOVO: A descrição que antes estava em concept
     semantic_field: string;
+    chunks?: string[];
 
     // O inventário de peças disponíveis nesta lição
     inventory: {
