@@ -175,7 +175,56 @@ export const mockLesson13: Lesson = {
     ],
 
     exercises: [
-        // ... (mantenha os exercícios existentes)
+        {
+            id: "ex_13_1",
+            type: "reorder",
+            instruction: "Organize as palavras na ordem correta (preste atenção na frequência):",
+            options: ["happy", "always", "is", "She"],
+            correct_answer: ["She", "is", "always", "happy"],
+            audio_text: "She is always happy.",
+            skill: "to_be_frequency_syntax",
+            difficulty: 2
+        },
+        {
+            id: "ex_13_2",
+            type: "multiple_choice",
+            instruction: "Qual frase está gramaticalmente correta?",
+            options: ["They isn't at the party.", "They aren't at the party.", "They not at the party."],
+            correct_answer: "They aren't at the party.",
+            audio_text: "They aren't at the party.",
+            skill: "to_be_negative_plural",
+            difficulty: 2
+        },
+        {
+            id: "ex_13_3",
+            type: "listening",
+            instruction: "🎧 Ouça a frase e organize as palavras na ordem correta:",
+            options: ["at", "never", "work", "He", "is"],
+            correct_answer: ["He", "is", "never", "at", "work"],
+            audio_text: "He is never at work.",
+            skill: "listening_to_be_frequency",
+            difficulty: 3
+        },
+        {
+            id: "ex_13_4",
+            type: "multiple_choice",
+            instruction: "🎧 Ouça a frase e escolha a tradução em português que corresponde EXATAMENTE ao que você escutou:",
+            options: ["Nós estamos sempre em casa.", "Nós não estamos em casa.", "Nós estamos às vezes em casa."],
+            correct_answer: "Nós estamos sempre em casa.",
+            audio_text: "We are always at home.",
+            skill: "listening_to_be_comprehension",
+            difficulty: 2
+        },
+        {
+            id: "ex_13_5",
+            type: "reorder",
+            instruction: "Organize as palavras para formar a frase negativa:",
+            options: ["in", "am", "I", "not", "love"],
+            correct_answer: ["I", "am", "not", "in", "love"],
+            audio_text: "I am not in love.",
+            skill: "to_be_negative_syntax",
+            difficulty: 1
+        }
     ]
 };
 
