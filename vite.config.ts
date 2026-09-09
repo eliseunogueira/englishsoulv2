@@ -7,5 +7,5 @@ export default defineConfig({
     react(),
     tailwindcss(), // <-- Adicione esta linha
   ],
-  base:'englishsoulv2',
+  base:'/englishsoulv2/',
 })
