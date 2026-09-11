@@ -1,11 +1,58 @@
 // src/components/ReviewMode.tsx
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { audioEngine } from '../utils/audio';
-import type { Exercise } from '../types/lesson';
+import type { Exercise, Lesson } from '../types/lesson';
 
 interface ReviewModeProps {
     onExit: () => void;
+}
+
+type ReviewExercise = Exercise & {
+    lessonId: string;
+    lessonTitle: string;
+};
+
+// ✅ FUNÇÃO PURA CORRIGIDA: Lida com weakSkills vazio
+function buildReviewSession(
+    lessons: Lesson[],
+    skillProgress: Record<string, { attempts: number; correct: number; skill: string }>
+): ReviewExercise[] {
+    const weakSkills = Object.values(skillProgress)
+        .filter(s => s.attempts >= 2 && (s.correct / s.attempts) < 0.8)
+        .sort((a, b) => (a.correct / a.attempts) - (b.correct / b.attempts));
+
+    const allExercises: ReviewExercise[] = [];
+
+    // ✅ CORREÇÃO: Verifica se há skills fracas antes de acessar [0]
+    if (weakSkills.length > 0) {
+        const weakestSkill = weakSkills[0].skill;
+        lessons.forEach(lesson => {
+            lesson.exercises.forEach(ex => {
+                if (ex.skill === weakestSkill) {
+                    allExercises.push({ ...ex, lessonId: lesson.id, lessonTitle: lesson.title });
+                }
+            });
+        });
+    } else {
+        // Fallback: últimas 3 lições
+        lessons.slice(-3).forEach(lesson => {
+            lesson.exercises.forEach(ex => {
+                allExercises.push({ ...ex, lessonId: lesson.id, lessonTitle: lesson.title });
+            });
+        });
+    }
+
+    // Remove duplicatas
+    const uniqueIds = new Set<string>();
+    const uniqueExercises = allExercises.filter(ex => {
+        if (uniqueIds.has(ex.id)) return false;
+        uniqueIds.add(ex.id);
+        return true;
+    });
+
+    // Embaralha UMA VEZ
+    return [...uniqueExercises].sort(() => Math.random() - 0.5);
 }
 
 const skillLabels: Record<string, string> = {
@@ -23,50 +70,26 @@ const skillLabels: Record<string, string> = {
     'to_be_frequency_syntax': 'TO BE + Frequência',
     'listening_comprehension': 'Compreensão Auditiva',
     'syntax': 'Sintaxe Geral',
+    'past negative syntax': 'Sintaxe: Passado Negativo',
+    'present perfect chunk': 'Present Perfect (Chunks)',
+    'listening continuous comprehension': 'Listening: Comp. do Contínuo',
+    'listening continuous': 'Listening: Presente Contínuo',
+    'future negative': 'Futuro Negativo (WON\'T)',
+    'listening future comprehension': 'Listening: Comp. do Futuro',
+    'past irregular': 'Verbos Irregulares (Passado)',
 };
 
 export function ReviewMode({ onExit }: ReviewModeProps) {
     const { lessons, skillProgress, updateSkillProgress } = useAppStore();
 
-    // ✅ SELEÇÃO DE EXERCÍCIOS SEM DUPLICAÇÃO
-    const reviewExercises = useMemo(() => {
-        const weakSkills = Object.values(skillProgress)
-            .filter(s => s.attempts >= 2 && (s.correct / s.attempts) < 0.8)
-            .sort((a, b) => (a.correct / a.attempts) - (b.correct / b.attempts));
+    // ✅ CORREÇÃO: Inicialização preguiçosa (lazy initialization)
+    // Executa APENAS UMA VEZ quando o componente monta
+    // Não usa useEffect, não causa cascading renders
+    const [reviewExercises] = useState<ReviewExercise[]>(() => {
+        return buildReviewSession(lessons, skillProgress);
+    });
 
-        let allExercises: (Exercise & { lessonId: string; lessonTitle: string })[] = [];
-
-        if (weakSkills.length > 0) {
-            const weakestSkill = weakSkills[0].skill;
-
-            lessons.forEach(lesson => {
-                lesson.exercises.forEach(ex => {
-                    if (ex.skill === weakestSkill) {
-                        allExercises.push({ ...ex, lessonId: lesson.id, lessonTitle: lesson.title });
-                    }
-                });
-            });
-        } else {
-            lessons.slice(-3).forEach(lesson => {
-                lesson.exercises.forEach(ex => {
-                    allExercises.push({ ...ex, lessonId: lesson.id, lessonTitle: lesson.title });
-                });
-            });
-        }
-
-        // ✅ REMOVE DUPLICATAS USANDO Set com ID
-        const uniqueIds = new Set<string>();
-        const uniqueExercises = allExercises.filter(ex => {
-            if (uniqueIds.has(ex.id)) return false;
-            uniqueIds.add(ex.id);
-            return true;
-        });
-
-        // Embaralha e retorna TODOS os únicos (sem limitar a 10 se tiver menos)
-        return uniqueExercises.sort(() => Math.random() - 0.5);
-    }, [lessons, skillProgress]);
-
-    // Estados
+    // Estados do quiz
     const [currentIndex, setCurrentIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -76,7 +99,9 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
 
     const currentExercise = reviewExercises[currentIndex];
 
-    const playExerciseAudio = (text: string) => {
+    // ... resto do componente permanece igual ...
+
+    const playExerciseAudio = (text: string | undefined) => {
         if (text) {
             audioEngine.playSentence(text);
         }
@@ -96,14 +121,12 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
         }
     };
 
-    // ✅ CHECK ANSWER REFACTORED
     const checkAnswer = () => {
         if (!currentExercise) return;
 
         const isReorder = currentExercise.type === 'reorder' || currentExercise.type === 'listening';
         const correctAnswer = currentExercise.correct_answer;
 
-        // Validação
         let isCorrect = false;
         if (isReorder && Array.isArray(correctAnswer)) {
             isCorrect = JSON.stringify(reorderSelection) === JSON.stringify(correctAnswer);
@@ -111,24 +134,24 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
             isCorrect = selectedOption === correctAnswer;
         }
 
-        // Marca como respondido
         setIsAnswered(true);
 
-        // Atualiza skill
+        // ✅ Incrementa score se acertou
+        if (isCorrect) {
+            setScore(prev => prev + 1);
+        }
+
+        // Atualiza skill progress (isso NÃO afeta a sessão congelada)
         if (currentExercise.skill) {
             updateSkillProgress(currentExercise.skill, isCorrect);
         }
 
-        // Se acertou, toca áudio
+        // Toca áudio com delay para garantir feedback visual primeiro
         if (isCorrect && currentExercise.audio_text) {
-            // Delay mínimo para garantir que o feedback visual apareça primeiro
-            setTimeout(() => {
-                playExerciseAudio(currentExercise.audio_text!);
-            }, 100);
+            setTimeout(() => playExerciseAudio(currentExercise.audio_text), 100);
         }
     };
 
-    // ✅ NEXT QUESTION - LIMPEZA EXPLÍCITA
     const nextQuestion = () => {
         // Limpa estados
         setSelectedOption(null);
@@ -161,7 +184,7 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
         const percentage = Math.round((score / reviewExercises.length) * 100);
         return (
             <div className="bg-soul-gray border border-gray-800 rounded-xl p-8 text-center mt-8">
-                <h3 className="text-2xl font-bold text-soul-gold mb-4"> Revisão Concluída!</h3>
+                <h3 className="text-2xl font-bold text-soul-gold mb-4">🔄 Revisão Concluída!</h3>
                 <div className="text-5xl font-extrabold text-white mb-6">
                     {score} <span className="text-2xl text-gray-500">/ {reviewExercises.length}</span>
                 </div>
@@ -204,7 +227,7 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
             {hasAudio && (
                 <div className="mb-8 flex justify-center">
                     <button
-                        onClick={() => currentExercise.audio_text && playExerciseAudio(currentExercise.audio_text)}
+                        onClick={() => playExerciseAudio(currentExercise.audio_text)}
                         className="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-8 rounded-lg hover:opacity-90 transition-all flex items-center gap-3 text-lg shadow-lg"
                     >
                         🔊 Ouvir Áudio
@@ -250,7 +273,7 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
                     </div>
                     {isAnswered && (
                         <div className={`mt-6 p-4 rounded-lg border-2 ${JSON.stringify(reorderSelection) === JSON.stringify(currentExercise.correct_answer) ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-red-900/20 border-red-500 text-red-400'}`}>
-                            <div className="font-bold text-lg mb-2">{JSON.stringify(reorderSelection) === JSON.stringify(currentExercise.correct_answer) ? '✅ Correto!' : ' Incorreto'}</div>
+                            <div className="font-bold text-lg mb-2">{JSON.stringify(reorderSelection) === JSON.stringify(currentExercise.correct_answer) ? '✅ Correto!' : '❌ Incorreto'}</div>
                             <div className="text-sm">
                                 <span className="font-semibold">Ordem correta:</span> {Array.isArray(currentExercise.correct_answer) ? currentExercise.correct_answer.join(' ') : currentExercise.correct_answer}
                             </div>
@@ -290,7 +313,7 @@ export function ReviewMode({ onExit }: ReviewModeProps) {
                 </div>
             )}
 
-            {/* Action Buttons - SEM AUTO FOCUS */}
+            {/* Action Buttons */}
             <div className="flex justify-end mt-6 border-t border-gray-700 pt-6">
                 {!isAnswered ? (
                     <button
