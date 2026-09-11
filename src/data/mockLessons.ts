@@ -113,6 +113,219 @@ export const mockLesson1: Lesson = {
 };
 
 // ============================================================================
+// LIÇÃO 2: CAN / CAN'T (Habilidades)
+// ============================================================================
+export const mockLesson2: Lesson = {
+    id: "lesson_2",
+    phase: "foundation",
+    title: "Abilities with CAN",
+    description: "Expressando o que você sabe ou não sabe fazer.",
+    semantic_field: "HABILIDADES E TALENTOS",
+    default_tense: "present",
+
+    inventory: {
+        subjects: ["I", "You", "He", "She", "It", "We", "They"],
+        auxiliaries: ["CAN", "CAN'T"],
+        verbs: [
+            { base: "speak", past: "spoke", valid_complements: ["English", "French", "loudly"], valid_complement_types: ["object", "adverb"] },
+            { base: "swim", past: "swam", valid_complements: ["very fast", "in the sea", "well"], valid_complement_types: ["adverb", "preposition"] },
+            { base: "cook", past: "cooked", valid_complements: ["delicious food", "pasta", "well"], valid_complement_types: ["object", "adverb"] },
+            { base: "drive", past: "drove", valid_complements: ["a car", "fast", "carefully"], valid_complement_types: ["object", "adverb"] }
+        ],
+        complements: ["English", "French", "very fast", "in the sea", "well", "delicious food", "pasta", "a car", "fast", "carefully"],
+        modifiers: []
+    },
+
+    frame_recipe: [
+        { id: "subject", accepts: "subject", label: "Subject", position: 0 },
+        { id: "auxiliary", accepts: "auxiliary", label: "CAN/CAN'T", position: 1 },
+        { id: "verb", accepts: "main_verb", label: "Verb", position: 2 },
+        { id: "complement", accepts: "complement", label: "Detail", position: 3 }
+    ],
+
+    sentences: [
+        { text: "I can speak English.", translation: "Eu sei falar inglês.", frame_parts: { subject: "I", auxiliary: "can", verb: "speak", complement: "English" } },
+        { text: "She can't swim very fast.", translation: "Ela não sabe nadar muito rápido.", frame_parts: { subject: "She", auxiliary: "can't", verb: "swim", complement: "very fast" } }
+    ],
+
+    contexts: [
+        { text: "I can cook delicious food, but I can't drive a car.", translation: "Eu sei cozinhar comida deliciosa, mas não sei dirigir um carro." }
+    ],
+
+    grammar_rules: [
+        { rule: "Modal Invariance", pattern: "CAN não muda. Não existe 'cans' ou 'canned'.", example: "He CAN speak. / She CAN'T swim." }
+    ],
+
+    exercises: [
+        {
+            id: "ex_2_1",
+            type: "multiple_choice",
+            instruction: "Qual frase está gramaticalmente correta?",
+            options: ["He cans speak English.", "He can speaks English.", "He can speak English."],
+            correct_answer: "He can speak English.",
+            audio_text: "He can speak English.",
+            skill: "modal_invariance",
+            difficulty: 1
+        },
+        {
+            id: "ex_2_2",
+            type: "reorder",
+            instruction: "Organize as palavras na ordem correta:",
+            options: ["swim", "can't", "very fast", "She"],
+            correct_answer: ["She", "can't", "swim", "very fast"],
+            audio_text: "She can't swim very fast.",
+            skill: "modal_syntax",
+            difficulty: 2
+        }
+    ]
+};
+
+// ============================================================================
+// LIÇÃO 4: SHOULD / SHOULDN'T (Conselhos)
+// ============================================================================
+export const mockLesson4: Lesson = {
+    id: "lesson_4",
+    phase: "foundation",
+    title: "Advice with SHOULD",
+    description: "Dando e recebendo conselhos e recomendações.",
+    semantic_field: "SAÚDE E BEM-ESTAR",
+    default_tense: "present",
+
+    inventory: {
+        subjects: ["I", "You", "He", "She", "We", "They"],
+        auxiliaries: ["SHOULD", "SHOULDN'T"],
+        verbs: [
+            { base: "study", past: "studied", valid_complements: ["more", "hard", "every day"], valid_complement_types: ["adverb"] },
+            { base: "eat", past: "ate", valid_complements: ["healthy food", "vegetables", "less sugar"], valid_complement_types: ["object"] },
+            { base: "sleep", past: "slept", valid_complements: ["8 hours", "well", "early"], valid_complement_types: ["adverb", "object"] },
+            { base: "work", past: "worked", valid_complements: ["hard", "less", "from home"], valid_complement_types: ["adverb", "preposition"] }
+        ],
+        complements: ["more", "hard", "every day", "healthy food", "vegetables", "less sugar", "8 hours", "well", "early", "less", "from home"],
+        modifiers: []
+    },
+
+    frame_recipe: [
+        { id: "subject", accepts: "subject", label: "Subject", position: 0 },
+        { id: "auxiliary", accepts: "auxiliary", label: "SHOULD", position: 1 },
+        { id: "verb", accepts: "main_verb", label: "Verb", position: 2 },
+        { id: "complement", accepts: "complement", label: "Detail", position: 3 }
+    ],
+
+    sentences: [
+        { text: "You should study more.", translation: "Você deveria estudar mais.", frame_parts: { subject: "You", auxiliary: "should", verb: "study", complement: "more" } },
+        { text: "He shouldn't eat less sugar.", translation: "Ele não deveria comer menos açúcar.", frame_parts: { subject: "He", auxiliary: "shouldn't", verb: "eat", complement: "less sugar" } }
+    ],
+
+    contexts: [
+        { text: "You look tired. You should sleep 8 hours and shouldn't work so hard.", translation: "Você parece cansado. Você deveria dormir 8 horas e não deveria trabalhar tanto." }
+    ],
+
+    grammar_rules: [
+        { rule: "Advice Modal", pattern: "SHOULD é invariável e sempre seguido da forma base do verbo.", example: "You SHOULD study. / He SHOULDN'T eat that." }
+    ],
+
+    exercises: [
+        {
+            id: "ex_4_1",
+            type: "listening",
+            instruction: " Ouça o conselho e organize as palavras:",
+            options: ["more", "should", "You", "study"],
+            correct_answer: ["You", "should", "study", "more"],
+            audio_text: "You should study more.",
+            skill: "listening_modal",
+            difficulty: 2
+        }
+    ]
+};
+
+// ============================================================================
+// LIÇÃO 7: TO + VERB (Intenções com WANT/NEED)
+// ============================================================================
+export const mockLesson7: Lesson = {
+    id: "lesson_7",
+    phase: "expansion",
+    title: "Intentions with TO",
+    description: "Expressando desejos e necessidades usando o infinitivo.",
+    semantic_field: "DESEJOS E NECESSIDADES",
+    default_tense: "present", // O primeiro verbo será conjugado no presente
+
+    inventory: {
+        subjects: ["I", "You", "He", "She", "We", "They"],
+        auxiliaries: [],
+        verbs: [
+            {
+                base: "want",
+                past: "wanted",
+                valid_complements: ["to learn English", "to go home", "to eat pizza", "to sleep early"],
+                valid_complement_types: ["infinitive"]
+            },
+            {
+                base: "need",
+                past: "needed",
+                valid_complements: ["to finish this", "to talk to you", "to rest a bit", "to buy a car"],
+                valid_complement_types: ["infinitive"]
+            },
+            {
+                base: "like",
+                past: "liked",
+                valid_complements: ["to travel the world", "to read books", "to cook dinner", "to play soccer"], // ✅ Ajustado
+                valid_complement_types: ["infinitive"]
+            }
+        ],
+        // Complementos agora batem exatamente com os valid_complements
+        complements: [
+            "to learn English", "to go home", "to eat pizza", "to sleep early",
+            "to finish this", "to talk to you", "to rest a bit", "to buy a car",
+            "to travel the world", "to read books", "to cook dinner", "to play soccer"
+        ],
+        modifiers: ["now", "today", "tomorrow", "every day"]
+    },
+
+    // ✅ A MÁGICA: O frame_recipe agora tem 4 slots, incluindo o modificador opcional
+    frame_recipe: [
+        { id: "subject", accepts: "subject", label: "Subject", position: 0 },
+        { id: "verb", accepts: "main_verb", label: "Verb (Want/Need)", position: 1 },
+        { id: "complement", accepts: "complement", label: "TO + Action", position: 2 },
+        { id: "modifier", accepts: "modifier", label: "Time", position: 3, isOptional: true }
+    ],
+
+    sentences: [
+        { text: "I want to learn English.", translation: "Eu quero aprender inglês.", frame_parts: { subject: "I", verb: "want", complement: "to learn English" } },
+        { text: "She needs to finish this today.", translation: "Ela precisa terminar isso hoje.", frame_parts: { subject: "She", verb: "need", complement: "to finish this", modifier: "today" } }
+    ],
+
+    contexts: [
+        { text: "I like to travel the world, but I need to work every day.", translation: "Eu gosto de viajar o mundo, mas preciso trabalhar todo dia." }
+    ],
+
+    grammar_rules: [
+        { rule: "Infinitive Structure", pattern: "O primeiro verbo é conjugado (He wants). A ação seguinte usa TO + base (to learn).", example: "He WANTS TO LEARN. / She NEEDS TO GO." }
+    ],
+
+    exercises: [
+        {
+            id: "ex_7_1",
+            type: "multiple_choice",
+            instruction: "Qual frase está correta?",
+            options: ["He want to learn.", "He wants to learn.", "He wants to learns."],
+            correct_answer: "He wants to learn.",
+            audio_text: "He wants to learn.",
+            skill: "infinitive_conjugation",
+            difficulty: 2
+        },
+        {
+            id: "ex_7_2",
+            type: "reorder",
+            instruction: "Organize a frase de necessidade:",
+            options: ["to", "finish", "She", "this", "needs"],
+            correct_answer: ["She", "needs", "to", "finish", "this"],
+            audio_text: "She needs to finish this.",
+            skill: "infinitive_syntax",
+            difficulty: 2
+        }
+    ]
+};
+// ============================================================================
 // LIÇÃO 13 - TO BE + FREQUENCY (Estados e Frequência)
 // ============================================================================
 // src/data/mockLessons.ts
@@ -666,6 +879,9 @@ export const mockLesson26: Lesson = {
 // Exportar todas as lições
 export const mockLessons: Lesson[] = [
     mockLesson1,
+    mockLesson2,
+    mockLesson4,
+    mockLesson7,
     mockLesson13,
     mockLesson17,
     mockLesson21,

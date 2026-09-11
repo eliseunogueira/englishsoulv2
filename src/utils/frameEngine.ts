@@ -8,6 +8,7 @@ export interface FrameState {
     subject?: string;
     auxiliary?: string;
     verb?: string;
+    to_verb?: string; // ✅ NOVO: Para estruturas como "want TO LEARN"
     complement?: string;
     modifier?: string;
 }
@@ -61,7 +62,13 @@ export class FrameEngine {
                 // TO BE + Verbo principal = Gerúndio (-ing)
                 result.displayTexts['verb'] = verbObj?.ing || GrammarEngine.getIngForm(state.verb);
                 result.suffixes['verb'] = 'ing';
-            } else if (isHaveHas) {
+            }
+            else if(state.to_verb){
+                // O verbo após "to" é SEMPRE a forma base.
+                result.displayTexts['to_verb'] = state.to_verb;
+                result.suffixes['to_verb'] = '';
+            }
+            else if (isHaveHas) {
                 // HAVE/HAS + Verbo principal = Particípio Passado
                 result.displayTexts['verb'] = verbObj?.participle || (state.verb.endsWith('e') ? state.verb + 'd' : state.verb + 'ed');
                 result.suffixes['verb'] = 'pp';

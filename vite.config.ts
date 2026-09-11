@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite' // <-- Adicione esta linha
 const base = process.env.NODE_ENV === 'production'
@@ -14,5 +14,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+  },
+  test: {
+    globals: true,
+    environment: 'node', // Usamos Node porque o GrammarEngine/FrameEngine são lógica pura
   },
 })
