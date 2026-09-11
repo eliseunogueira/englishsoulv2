@@ -30,9 +30,13 @@ interface AppState {
     progress: Record<string, LessonProgress>;
     updateProgress: (lessonId: string, score: number, total: number) => void;
 
-    // === PROGRESSO POR SKILL (NOVO - Diagnóstico Inteligente) ===
+    // === PROGRESSO POR SKILL (Diagnóstico Inteligente) ===
     skillProgress: Record<string, SkillProgress>;
     updateSkillProgress: (skill: string, isCorrect: boolean) => void;
+
+    // === PREFERÊNCIAS DO USUÁRIO (NOVO - VoiceSelector) ===
+    preferredVoiceURI: string | null; // null = usar voz padrão do sistema
+    setPreferredVoice: (uri: string | null) => void;
 
     // === UTILITÁRIOS ===
     resetAllProgress: () => void;
@@ -46,6 +50,7 @@ export const useAppStore = create<AppState>()(
             currentLesson: null,
             progress: {},
             skillProgress: {},
+            preferredVoiceURI: null, // ✅ NOVO: começa sem preferência
 
             // --- Ações: Lições ---
             setLessons: (lessons) => set({ lessons }),
@@ -75,7 +80,7 @@ export const useAppStore = create<AppState>()(
                     };
                 }),
 
-            // --- Ações: Progresso por Skill (NOVO) ---
+            // --- Ações: Progresso por Skill ---
             updateSkillProgress: (skill, isCorrect) =>
                 set((state) => {
                     const existing = state.skillProgress[skill];
@@ -93,11 +98,15 @@ export const useAppStore = create<AppState>()(
                     };
                 }),
 
+            // --- Ações: Preferências de Voz (NOVO) ---
+            setPreferredVoice: (uri) => set({ preferredVoiceURI: uri }),
+
             // --- Ações: Reset ---
             resetAllProgress: () =>
                 set({
                     progress: {},
                     skillProgress: {},
+                    preferredVoiceURI: null, // ✅ Reseta também a preferência de voz
                 }),
         }),
         {
@@ -107,6 +116,7 @@ export const useAppStore = create<AppState>()(
                 lessons: state.lessons,
                 progress: state.progress,
                 skillProgress: state.skillProgress,
+                preferredVoiceURI: state.preferredVoiceURI, // ✅ Persiste a voz preferida
             }),
         }
     )
