@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { ReviewMode } from './ReviewMode'; // ✅ Importe o ReviewMode
 import type { Lesson } from '../types/lesson';
+import { SkillDiagnostic } from './SkillDiagnostic'; // ✅ Importe
 
 export function ProgressDashboard() {
     const { lessons, progress, setCurrentLesson } = useAppStore();
@@ -177,7 +178,8 @@ export function ProgressDashboard() {
                     </div>
                 </div>
             )}
-
+            {/* ✅ SUBSTITUIR: De "Lições que Precisam de Atenção" para Diagnóstico por Skill */}
+            <SkillDiagnostic />
             {/* Mensagem Motivacional */}
             <div className="text-center py-4 border-t border-gray-700">
                 <p className="text-gray-400 text-sm italic">

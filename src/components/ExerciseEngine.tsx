@@ -11,6 +11,7 @@ interface ExerciseEngineProps {
 export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
     const exercises = lesson.exercises || [];
     const updateProgress = useAppStore((state) => state.updateProgress);
+    const updateSkillProgress = useAppStore((state) => state.updateSkillProgress)
 
     // Estado do Quiz
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,6 +51,8 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
         if (!currentExercise) return;
         setIsAnswered(true);
 
+        // 1. Calcula se acertou
+        // eslint-disable-next-line no-useless-assignment
         let isCorrect = false;
         if (currentExercise.type === 'reorder' || currentExercise.type === 'listening') {
             isCorrect = JSON.stringify(reorderSelection) === JSON.stringify(currentExercise.correct_answer);
@@ -57,6 +60,12 @@ export function ExerciseEngine({ lesson }: ExerciseEngineProps) {
             isCorrect = selectedOption === currentExercise.correct_answer;
         }
 
+        // 2. ✅ USA isCorrect para rastrear skill
+        if (currentExercise.skill) {
+            updateSkillProgress(currentExercise.skill, isCorrect);
+        }
+
+        // 3. ✅ USA isCorrect para atualizar score e tocar áudio
         if (isCorrect) {
             setScore((prev) => prev + 1);
             if (currentExercise.audio_text && currentExercise.type !== 'listening') {

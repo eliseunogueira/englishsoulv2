@@ -1,62 +1,113 @@
 // src/store/useAppStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Lesson } from '../types/lesson';
+import type { Lesson, LessonProgress } from '../types/lesson';
 
-export interface LessonProgress {
+/**
+ * Interface para progresso individual por skill/habilidade.
+ * Permite diagnóstico granular além do nível da lição.
+ */
+export interface SkillProgress {
+    skill: string;
     attempts: number;
-    bestScore: number;
-    completed: boolean;
+    correct: number;
+    lastAttempt: string; // ISO date string
 }
 
+/**
+ * Estado global da aplicação.
+ */
 interface AppState {
+    // === DADOS DAS LIÇÕES ===
     lessons: Lesson[];
-    currentLesson: Lesson | null;
-    progress: Record<string, LessonProgress>;
-    preferredVoiceURI: string | null;
-
     setLessons: (lessons: Lesson[]) => void;
+
+    // === ESTADO DE NAVEGAÇÃO ===
+    currentLesson: Lesson | null;
     setCurrentLesson: (lesson: Lesson | null) => void;
-    updateProgress: (lessonId: string, correct: number, total: number) => void;
-    setPreferredVoice: (voiceURI: string | null) => void;
+
+    // === PROGRESSO POR LIÇÃO (mantido para compatibilidade) ===
+    progress: Record<string, LessonProgress>;
+    updateProgress: (lessonId: string, score: number, total: number) => void;
+
+    // === PROGRESSO POR SKILL (NOVO - Diagnóstico Inteligente) ===
+    skillProgress: Record<string, SkillProgress>;
+    updateSkillProgress: (skill: string, isCorrect: boolean) => void;
+
+    // === UTILITÁRIOS ===
+    resetAllProgress: () => void;
 }
 
 export const useAppStore = create<AppState>()(
     persist(
         (set) => ({
+            // --- Estado Inicial ---
             lessons: [],
             currentLesson: null,
             progress: {},
-            preferredVoiceURI: null,
+            skillProgress: {},
 
+            // --- Ações: Lições ---
             setLessons: (lessons) => set({ lessons }),
+
+            // --- Ações: Navegação ---
             setCurrentLesson: (lesson) => set({ currentLesson: lesson }),
 
-            setPreferredVoice: (voiceURI) => {
-                set({ preferredVoiceURI: voiceURI });
-                import('../utils/audio').then(module => {
-                    module.audioEngine.setVoice(voiceURI);
-                });
-            },
+            // --- Ações: Progresso por Lição ---
+            updateProgress: (lessonId, score, total) =>
+                set((state) => {
+                    const existing = state.progress[lessonId];
+                    const percentage = Math.round((score / total) * 100);
+                    const newBestScore = existing
+                        ? Math.max(existing.bestScore, percentage)
+                        : percentage;
 
-            updateProgress: (lessonId, correct, total) => set((state) => {
-                const score = Math.round((correct / total) * 100);
-                const currentProgress = state.progress[lessonId] || { attempts: 0, bestScore: 0, completed: false };
-
-                return {
-                    progress: {
-                        ...state.progress,
-                        [lessonId]: {
-                            attempts: currentProgress.attempts + 1,
-                            bestScore: Math.max(currentProgress.bestScore, score),
-                            completed: score >= 80 ? true : currentProgress.completed,
+                    return {
+                        progress: {
+                            ...state.progress,
+                            [lessonId]: {
+                                attempts: (existing?.attempts || 0) + 1,
+                                bestScore: newBestScore,
+                                completed: percentage >= 80,
+                                lastAttempt: new Date().toISOString(),
+                            },
                         },
-                    },
-                };
-            }),
+                    };
+                }),
+
+            // --- Ações: Progresso por Skill (NOVO) ---
+            updateSkillProgress: (skill, isCorrect) =>
+                set((state) => {
+                    const existing = state.skillProgress[skill];
+
+                    return {
+                        skillProgress: {
+                            ...state.skillProgress,
+                            [skill]: {
+                                skill,
+                                attempts: (existing?.attempts || 0) + 1,
+                                correct: (existing?.correct || 0) + (isCorrect ? 1 : 0),
+                                lastAttempt: new Date().toISOString(),
+                            },
+                        },
+                    };
+                }),
+
+            // --- Ações: Reset ---
+            resetAllProgress: () =>
+                set({
+                    progress: {},
+                    skillProgress: {},
+                }),
         }),
         {
-            name: 'english-soul-storage',
+            name: 'english-soul-storage', // Chave no localStorage
+            // Persiste tudo exceto currentLesson (que é estado de navegação temporário)
+            partialize: (state) => ({
+                lessons: state.lessons,
+                progress: state.progress,
+                skillProgress: state.skillProgress,
+            }),
         }
     )
 );
