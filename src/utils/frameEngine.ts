@@ -11,6 +11,8 @@ export interface FrameState {
     to_verb?: string; // ✅ NOVO: Para estruturas como "want TO LEARN"
     complement?: string;
     modifier?: string;
+    question_word?: string; // ✅ NOVO
+    there_be?: string;      // ✅ NOVO
 }
 
 /**
@@ -104,6 +106,17 @@ export class FrameEngine {
             }
         }
 
+        // Processamento do Question Word (apenas texto, sem transformação)
+        if (state.question_word) {
+            result.displayTexts['question_word'] = state.question_word;
+            result.suffixes['question_word'] = '';
+        }
+
+// Processamento do There is/are (apenas texto, sem transformação)
+        if (state.there_be) {
+            result.displayTexts['there_be'] = state.there_be;
+            result.suffixes['there_be'] = '';
+        }
         // Preenche os textos dos outros slots (sem transformação)
         if (state.subject) result.displayTexts['subject'] = state.subject;
         if (state.auxiliary) result.displayTexts['auxiliary'] = state.auxiliary;
@@ -122,6 +135,30 @@ export class FrameEngine {
             }
         }
 
+        // 3.1 Validação de Número (There is/are + Complemento)
+        if (state.there_be && state.complement) {
+            const isThereBe = state.there_be.toLowerCase().includes('there');
+            if (isThereBe) {
+                const isPlural = state.there_be.toLowerCase().includes('are');
+                const isSingular = state.there_be.toLowerCase().includes('is');
+                const isNegative = state.there_be.toLowerCase().includes("n't");
+
+                const complementNumber = lesson.inventory.complement_number?.[state.complement] || GrammarEngine.detectNumber(state.complement);
+
+                if (complementNumber) {
+                    // Se escolheu singular (is) mas o complemento é plural
+                    if (isSingular && complementNumber === 'plural') {
+                        const suggestion = isNegative ? "There aren't" : "There are";
+                        result.errorMessage = `Ops! "${state.complement}" é plural. Use "${suggestion}".`;
+                    }
+                    // Se escolheu plural (are) mas o complemento é singular
+                    else if (isPlural && complementNumber === 'singular') {
+                        const suggestion = isNegative ? "There isn't" : "There is";
+                        result.errorMessage = `Ops! "${state.complement}" é singular. Use "${suggestion}".`;
+                    }
+                }
+            }
+        }
         // 4. Montagem da Frase de Áudio (Dinâmica baseada no frame_recipe)
         // O áudio obedece exatamente à ordem visual definida na receita da lição.
         const audioParts: string[] = [];

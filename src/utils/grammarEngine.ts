@@ -87,4 +87,30 @@ export class GrammarEngine {
         if (processed.startsWith('i ')) return processed;
         return processed.charAt(0).toUpperCase() + processed.slice(1);
     }
+    /**
+     * Detecta se um complemento é singular ou plural baseado em heurísticas.
+     * Usado como fallback quando complement_number não está definido.
+     */
+    public static detectNumber(complement: string): 'singular' | 'plural' {
+        const lower = complement.toLowerCase();
+
+        // Plural indicators
+        if (lower.match(/\b(two|three|four|five|many|several|a lot of|some|few)\b/)) {
+            return 'plural';
+        }
+
+        // Singular indicators
+        if (lower.match(/\b(a|an|one|the)\b/)) {
+            return 'singular';
+        }
+
+        // Ends with 's' (but not 'ss', 'us', 'is')
+        if (lower.endsWith('s') && !lower.endsWith('ss') && !lower.endsWith('us') && !lower.endsWith('is')) {
+            return 'plural';
+        }
+
+        return 'singular'; // Default
+    }
+
 }
+

@@ -67,6 +67,9 @@ export interface Lesson {
         verbs: Verb[];
         complements: string[];
         modifiers: string[];
+        question_words?: string[]; // ✅ NOVO: Para Lição 3
+        there_be?: string[];       // ✅ NOVO: Para Lição 5
+        complement_number?: Record<string, 'singular' | 'plural'>; // ✅ NOVO
     };
 
     frame_recipe: FrameSlot[];

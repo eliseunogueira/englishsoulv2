@@ -181,6 +181,89 @@ export const mockLesson2: Lesson = {
 };
 
 // ============================================================================
+// LIÇÃO 3: WH-QUESTIONS (Perguntas)
+// ============================================================================
+export const mockLesson3: Lesson = {
+    id: "lesson_3",
+    phase: "foundation",
+    title: "WH-Questions (Present Simple)",
+    description: "Fazendo perguntas com What, Where, When, Who, Why e How.",
+    semantic_field: "PERGUNTAS E INFORMAÇÕES",
+    default_tense: "present",
+
+    inventory: {
+        subjects: ["I", "You", "He", "She", "We", "They"],
+        auxiliaries: ["DO", "DOES", "AM", "IS", "ARE"], // ✅ Adicionado AM
+        verbs: [
+
+    { base: "live", past: "lived", ing: "living", valid_complements: ["in Brazil", "here"], valid_complement_types: ["preposition", "adverb"] },
+    { base: "work", past: "worked", ing: "working", valid_complements: ["here", "at home"], valid_complement_types: ["adverb", "preposition"] },
+    { base: "eat", past: "ate", ing: "eating", valid_complements: ["pizza", "breakfast"], valid_complement_types: ["object"] },
+    { base: "study", past: "studied", ing: "studying", valid_complements: ["English", "at night"], valid_complement_types: ["object", "adverb"] }
+
+        ],
+        complements: ["in Brazil", "in a house", "here", "at home", "in an office", "pizza", "breakfast", "lunch", "English", "at night", "every day"],
+        modifiers: [],
+        question_words: ["What", "Where", "When", "Who", "Why", "How"] // ✅ NOVO
+    },
+
+    frame_recipe: [
+        { id: "question_word", accepts: "question_word", label: "WH-", position: 0 },
+        { id: "auxiliary", accepts: "auxiliary", label: "Aux", position: 1 },
+        { id: "subject", accepts: "subject", label: "Subject", position: 2 },
+        { id: "verb", accepts: "main_verb", label: "Verb", position: 3 },
+        { id: "complement", accepts: "complement", label: "Detail", position: 4, isOptional: true }
+    ],
+
+    sentences: [
+        { text: "Where do you live?", translation: "Onde você mora?", frame_parts: { question_word: "Where", auxiliary: "do", subject: "you", verb: "live" } },
+        { text: "What does she eat?", translation: "O que ela come?", frame_parts: { question_word: "What", auxiliary: "does", subject: "she", verb: "eat" } },
+        { text: "When do they study?", translation: "Quando eles estudam?", frame_parts: { question_word: "When", auxiliary: "do", subject: "they", verb: "study" } }
+    ],
+
+    contexts: [
+        { text: "Where do you live? I live in Brazil. What do you eat? I eat pizza.", translation: "Onde você mora? Eu moro no Brasil. O que você come? Eu como pizza." }
+    ],
+
+    grammar_rules: [
+        { rule: "WH-Question Structure", pattern: "WH- + Aux + Subject + Verb + Complement?", example: "WHERE do you LIVE? / WHAT does she EAT?" }
+    ],
+
+    exercises: [
+        {
+            id: "ex_3_1",
+            type: "multiple_choice",
+            instruction: "Qual pergunta está correta?",
+            options: ["Where you live?", "Where do you live?", "Where does you live?"],
+            correct_answer: "Where do you live?",
+            audio_text: "Where do you live?",
+            skill: "wh_question_syntax",
+            difficulty: 2
+        },
+        {
+            id: "ex_3_2",
+            type: "reorder",
+            instruction: "Organize a pergunta:",
+            options: ["eat", "does", "What", "she"],
+            correct_answer: ["What", "does", "she", "eat"],
+            audio_text: "What does she eat?",
+            skill: "wh_question_reorder",
+            difficulty: 2
+        },
+        {
+            id: "ex_3_3",
+            type: "listening",
+            instruction: "🎧 Ouça e organize as palavras:",
+            options: ["they", "study", "When", "do"],
+            correct_answer: ["When", "do", "they", "study"],
+            audio_text: "When do they study?",
+            skill: "listening_wh_question",
+            difficulty: 3
+        }
+    ]
+};
+
+// ============================================================================
 // LIÇÃO 4: SHOULD / SHOULDN'T (Conselhos)
 // ============================================================================
 export const mockLesson4: Lesson = {
@@ -238,6 +321,80 @@ export const mockLesson4: Lesson = {
     ]
 };
 
+// ============================================================================
+// LIÇÃO 5: THERE IS / THERE ARE (Existência)
+// ============================================================================
+export const mockLesson5: Lesson = {
+    id: "lesson_5",
+    phase: "foundation",
+    title: "There is / There are",
+    description: "Descrevendo o que existe em um lugar.",
+    semantic_field: "LUGARES E DESCRIÇÕES",
+    default_tense: "present",
+
+    inventory: {
+        subjects: [],
+        auxiliaries: [],
+        verbs: [],
+        complements: ["a book", "two cats", "many people", "a car", "a table", "three dogs", "some water", "a lot of students"],
+        modifiers: ["here", "there", "in the room", "on the table", "at home"],
+        there_be: ["There is", "There are", "There isn't", "There aren't"],
+        // ✅ NOVO: Mapeamento de número para cada complemento
+        complement_number: {
+            "a book": "singular",
+            "two cats": "plural",
+            "many people": "plural",
+            "a car": "singular",
+            "a table": "singular",
+            "three dogs": "plural",
+            "some water": "singular", // "water" é incontável
+            "a lot of students": "plural"
+        }
+    },
+
+    frame_recipe: [
+        { id: "there_be", accepts: "there_be", label: "There is/are", position: 0 },
+        { id: "complement", accepts: "complement", label: "What exists", position: 1 },
+        { id: "modifier", accepts: "modifier", label: "Where", position: 2, isOptional: true }
+    ],
+
+    sentences: [
+        { text: "There is a book on the table.", translation: "Há um livro na mesa.", frame_parts: { there_be: "There is", complement: "a book", modifier: "on the table" } },
+        { text: "There are two cats here.", translation: "Há dois gatos aqui.", frame_parts: { there_be: "There are", complement: "two cats", modifier: "here" } },
+        { text: "There are many people in the room.", translation: "Há muitas pessoas na sala.", frame_parts: { there_be: "There are", complement: "many people", modifier: "in the room" } }
+    ],
+
+    contexts: [
+        { text: "There is a car at home. There are three dogs here.", translation: "Há um carro em casa. Há três cachorros aqui." }
+    ],
+
+    grammar_rules: [
+        { rule: "There is/are Structure", pattern: "There IS (singular) / There ARE (plural) + What exists + Where", example: "There IS a book. / There ARE two cats." }
+    ],
+
+    exercises: [
+        {
+            id: "ex_5_1",
+            type: "multiple_choice",
+            instruction: "Qual frase está correta?",
+            options: ["There is two cats.", "There are two cats.", "There two cats are."],
+            correct_answer: "There are two cats.",
+            audio_text: "There are two cats.",
+            skill: "there_be_agreement",
+            difficulty: 1
+        },
+        {
+            id: "ex_5_2",
+            type: "reorder",
+            instruction: "Organize a frase:",
+            options: ["on the table", "a book", "There is"],
+            correct_answer: ["There is", "a book", "on the table"],
+            audio_text: "There is a book on the table.",
+            skill: "there_be_syntax",
+            difficulty: 2
+        }
+    ]
+};
 // ============================================================================
 // LIÇÃO 7: TO + VERB (Intenções com WANT/NEED)
 // ============================================================================
@@ -321,6 +478,86 @@ export const mockLesson7: Lesson = {
             correct_answer: ["She", "needs", "to", "finish", "this"],
             audio_text: "She needs to finish this.",
             skill: "infinitive_syntax",
+            difficulty: 2
+        }
+    ]
+};
+
+// ============================================================================
+// LIÇÃO 8: IMPERATIVE (Comandos e Pedidos)
+// ============================================================================
+export const mockLesson8: Lesson = {
+    id: "lesson_8",
+    phase: "foundation",
+    title: "Imperative",
+    description: "Dando comandos, pedidos e instruções.",
+    semantic_field: "INSTRUÇÕES E PEDIDOS",
+    default_tense: "present",
+
+    inventory: {
+        subjects: [], // Imperativo não tem sujeito explícito
+        auxiliaries: ["DON'T"], // Apenas para negativa
+        verbs: [
+            { base: "open", past: "opened", valid_complements: ["the door", "the window", "your book"], valid_complement_types: ["object"] },
+            { base: "close", past: "closed", valid_complements: ["the door", "the window", "your eyes"], valid_complement_types: ["object"] },
+            { base: "listen", past: "listened", valid_complements: ["to me", "to the music", "carefully"], valid_complement_types: ["preposition", "adverb"] },
+            { base: "read", past: "read", valid_complements: ["the book", "the text", "carefully"], valid_complement_types: ["object", "adverb"] },
+            { base: "write", past: "wrote", valid_complements: ["your name", "the answer", "here"], valid_complement_types: ["object", "adverb"] }
+        ],
+        complements: ["the door", "the window", "your book", "your eyes", "to me", "to the music", "carefully", "the book", "the text", "your name", "the answer", "here"],
+        modifiers: ["please", "now", "quickly"]
+    },
+
+    frame_recipe: [
+        { id: "auxiliary", accepts: "auxiliary", label: "DON'T", position: 0, isOptional: true },
+        { id: "verb", accepts: "main_verb", label: "Verb", position: 1 },
+        { id: "complement", accepts: "complement", label: "Detail", position: 2, isOptional: true },
+        { id: "modifier", accepts: "modifier", label: "Please/Now", position: 3, isOptional: true }
+    ],
+
+    sentences: [
+        { text: "Open the door, please.", translation: "Abra a porta, por favor.", frame_parts: { verb: "open", complement: "the door", modifier: "please" } },
+        { text: "Don't close the window.", translation: "Não feche a janela.", frame_parts: { auxiliary: "don't", verb: "close", complement: "the window" } },
+        { text: "Listen to me carefully.", translation: "Me escute com atenção.", frame_parts: { verb: "listen", complement: "to me", modifier: "carefully" } }
+    ],
+
+    contexts: [
+        { text: "Open your book, please. Read the text. Don't write here.", translation: "Abra seu livro, por favor. Leia o texto. Não escreva aqui." }
+    ],
+
+    grammar_rules: [
+        { rule: "Imperative Structure", pattern: "Verb (base) + Complement. Para negativa: DON'T + Verb.", example: "OPEN the door. / DON'T CLOSE the window." }
+    ],
+
+    exercises: [
+        {
+            id: "ex_8_1",
+            type: "multiple_choice",
+            instruction: "Qual comando está correto?",
+            options: ["Opens the door.", "Open the door.", "Opening the door."],
+            correct_answer: "Open the door.",
+            audio_text: "Open the door.",
+            skill: "imperative_form",
+            difficulty: 1
+        },
+        {
+            id: "ex_8_2",
+            type: "reorder",
+            instruction: "Organize o comando negativo:",
+            options: ["the window", "Don't", "close"],
+            correct_answer: ["Don't", "close", "the window"],
+            audio_text: "Don't close the window.",
+            skill: "imperative_negative",
+            difficulty: 2
+        },
+        {
+            id: "ex_8_3",
+            type: "listening",
+            instruction: " Ouça e organize:",
+            options: ["to me", "Listen", "carefully"],
+            correct_answer: ["Listen", "to me", "carefully"],
+            audio_text: "Listen to me carefully.",
+            skill: "listening_imperative",
             difficulty: 2
         }
     ]
@@ -880,8 +1117,11 @@ export const mockLesson26: Lesson = {
 export const mockLessons: Lesson[] = [
     mockLesson1,
     mockLesson2,
+    mockLesson3,
     mockLesson4,
+    mockLesson5,
     mockLesson7,
+    mockLesson8,
     mockLesson13,
     mockLesson17,
     mockLesson21,

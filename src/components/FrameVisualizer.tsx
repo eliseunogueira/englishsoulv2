@@ -11,16 +11,13 @@ interface FrameVisualizerProps {
 export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
     const [filledSlots, setFilledSlots] = useState<FrameState>({});
 
-    // ✅ Toda a lógica de processamento está no FrameEngine
+    // Toda a lógica de processamento está no FrameEngine
     const frameResult = useMemo(() => {
         return FrameEngine.processFrame(filledSlots, lesson);
     }, [filledSlots, lesson]);
 
     const handleWordClick = (word: string, pieceType: string) => {
-        // Atualiza o slot
         setFilledSlots(prev => ({ ...prev, [pieceType]: word }));
-
-        // Toca o áudio da palavra clicada
         audioEngine.playWord(word);
     };
 
@@ -34,11 +31,133 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
         }
     };
 
-// Por esta:
+    // O frame está completo quando todos os slots obrigatórios estão preenchidos
     const isFrameComplete = lesson.frame_recipe
         .filter(slot => !slot.isOptional)
         .every(slot => filledSlots[slot.id as keyof FrameState]);
 
+    // ============================================================================
+    // RENDERIZAÇÃO DINÂMICA DOS SLOTS DO FRAME
+    // ============================================================================
+    const renderFrameSlots = () => {
+        return lesson.frame_recipe.map((slot) => {
+            const slotId = slot.id as keyof FrameState;
+            const isFilled = filledSlots[slotId];
+            const displayText = frameResult.displayTexts[slot.id] || (isFilled ? String(isFilled) : '___');
+            const suffix = frameResult.suffixes[slot.id];
+
+            return (
+                <div
+                    key={slot.id}
+                    className={`relative flex flex-col items-center justify-center w-32 h-24 rounded-lg border-2 transition-all duration-300 ${
+                        isFilled ? 'border-soul-gold bg-soul-gold/10' : 'border-dashed border-gray-600 bg-soul-dark'
+                    }`}
+                >
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+            {slot.label}
+          </span>
+                    <span className={`text-lg font-bold ${isFilled ? 'text-soul-gold' : 'text-gray-600'}`}>
+            {displayText}
+          </span>
+
+                    {suffix && (
+                        <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+              +{suffix}
+            </span>
+                    )}
+                </div>
+            );
+        });
+    };
+
+    // ============================================================================
+    // RENDERIZAÇÃO DINÂMICA DO BANCO DE PALAVRAS (INVENTÁRIO)
+    // ============================================================================
+
+    // Mapeamento: tipo de peça (accepts) -> dados do inventário + label da seção
+    const inventorySections: {
+        type: string;
+        label: string;
+        items: string[];
+        slotId: keyof FrameState;
+    }[] = [
+        {
+            type: 'subject',
+            label: 'Sujeitos',
+            items: lesson.inventory.subjects,
+            slotId: 'subject'
+        },
+        {
+            type: 'auxiliary',
+            label: 'Auxiliares',
+            items: lesson.inventory.auxiliaries,
+            slotId: 'auxiliary'
+        },
+        {
+            type: 'question_word',
+            label: 'Question Words',
+            items: lesson.inventory.question_words || [],
+            slotId: 'question_word'
+        },
+        {
+            type: 'there_be',
+            label: 'There is/are',
+            items: lesson.inventory.there_be || [],
+            slotId: 'there_be'
+        },
+        {
+            type: 'main_verb',
+            label: 'Verbos',
+            items: lesson.inventory.verbs.map(v => v.base),
+            slotId: 'verb'
+        },
+        {
+            type: 'complement',
+            label: 'Complementos',
+            items: lesson.inventory.complements,
+            slotId: 'complement'
+        },
+        {
+            type: 'modifier',
+            label: 'Modificadores',
+            items: lesson.inventory.modifiers,
+            slotId: 'modifier'
+        },
+    ];
+
+    const renderInventoryButtons = () => {
+        return inventorySections
+            .filter(section => section.items.length > 0) // Só renderiza seções com itens
+            .map((section) => (
+                <div key={section.type}>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">
+                        {section.label}
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {section.items.map((item, idx) => {
+                            const isSelected = filledSlots[section.slotId] === item;
+                            return (
+                                <button
+                                    key={`${section.type}-${idx}`}
+                                    onClick={() => handleWordClick(item, section.slotId)}
+                                    className={`px-4 py-2 rounded-md border transition-all text-sm font-bold ${
+                                        isSelected
+                                            ? 'bg-soul-gold text-soul-dark border-soul-gold'
+                                            : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
+                                    }`}
+                                >
+                                    {item}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ));
+    };
+
+    // ============================================================================
+    // RENDERIZAÇÃO PRINCIPAL
+    // ============================================================================
     return (
         <div className="bg-soul-gray border border-gray-800 rounded-xl p-6 mb-8">
             {/* Header */}
@@ -51,36 +170,9 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
                 </button>
             </div>
 
-            {/* Slots Dinâmicos */}
+            {/* Slots Dinâmicos do Frame */}
             <div className="flex flex-wrap justify-center gap-4 mb-8">
-                {lesson.frame_recipe.map((slot) => {
-                    const isFilled = filledSlots[slot.id as keyof FrameState];
-                    const displayText = frameResult.displayTexts[slot.id] || (isFilled ? isFilled : '___');
-                    const suffix = frameResult.suffixes[slot.id];
-
-                    return (
-                        <div
-                            key={slot.id}
-                            className={`relative flex flex-col items-center justify-center w-32 h-24 rounded-lg border-2 transition-all duration-300 ${
-                                isFilled ? 'border-soul-gold bg-soul-gold/10' : 'border-dashed border-gray-600 bg-soul-dark'
-                            }`}
-                        >
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                {slot.label}
-              </span>
-                            <span className={`text-lg font-bold ${isFilled ? 'text-soul-gold' : 'text-gray-600'}`}>
-                {displayText}
-              </span>
-
-                            {/* Selo de Sufixo (s, ing, pp) */}
-                            {suffix && (
-                                <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                  +{suffix}
-                </span>
-                            )}
-                        </div>
-                    );
-                })}
+                {renderFrameSlots()}
             </div>
 
             {/* Mensagem de Erro (Concordância ou Semântica) */}
@@ -102,111 +194,9 @@ export function FrameVisualizer({ lesson }: FrameVisualizerProps) {
                 </div>
             )}
 
-            {/* Banco de Palavras */}
+            {/* Banco de Palavras (Inventário Dinâmico) */}
             <div className="space-y-6">
-                {/* Sujeitos */}
-                <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Sujeitos</p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                        {lesson.inventory.subjects.map((subject, idx) => (
-                            <button
-                                key={`s-${idx}`}
-                                onClick={() => handleWordClick(subject, 'subject')}
-                                className={`px-4 py-2 rounded-md border transition-all text-sm font-bold ${
-                                    filledSlots.subject === subject
-                                        ? 'bg-soul-gold text-soul-dark border-soul-gold'
-                                        : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
-                                }`}
-                            >
-                                {subject}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Auxiliares */}
-                {lesson.inventory.auxiliaries.length > 0 && (
-                    <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Auxiliares</p>
-                        <div className="flex flex-wrap justify-center gap-2">
-                            {lesson.inventory.auxiliaries.map((aux, idx) => (
-                                <button
-                                    key={`a-${idx}`}
-                                    onClick={() => handleWordClick(aux, 'auxiliary')}
-                                    className={`px-4 py-2 rounded-md border transition-all text-sm ${
-                                        filledSlots.auxiliary === aux
-                                            ? 'bg-soul-gold text-soul-dark border-soul-gold'
-                                            : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
-                                    }`}
-                                >
-                                    {aux}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Verbos */}
-                <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Verbos</p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                        {lesson.inventory.verbs.map((verb, idx) => (
-                            <button
-                                key={`v-${idx}`}
-                                onClick={() => handleWordClick(verb.base, 'verb')}
-                                className={`px-4 py-2 rounded-md border transition-all text-sm font-medium ${
-                                    filledSlots.verb === verb.base
-                                        ? 'bg-soul-gold text-soul-dark border-soul-gold'
-                                        : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
-                                }`}
-                            >
-                                {verb.base}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Complementos */}
-                <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Complementos</p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                        {lesson.inventory.complements.map((comp, idx) => (
-                            <button
-                                key={`c-${idx}`}
-                                onClick={() => handleWordClick(comp, 'complement')}
-                                className={`px-4 py-2 rounded-md border transition-all text-sm ${
-                                    filledSlots.complement === comp
-                                        ? 'bg-soul-gold text-soul-dark border-soul-gold'
-                                        : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
-                                }`}
-                            >
-                                {comp}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Modificadores */}
-                {lesson.inventory.modifiers.length > 0 && (
-                    <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Modificadores</p>
-                        <div className="flex flex-wrap justify-center gap-2">
-                            {lesson.inventory.modifiers.map((mod, idx) => (
-                                <button
-                                    key={`m-${idx}`}
-                                    onClick={() => handleWordClick(mod, 'modifier')}
-                                    className={`px-4 py-2 rounded-md border transition-all text-sm ${
-                                        filledSlots.modifier === mod
-                                            ? 'bg-soul-gold text-soul-dark border-soul-gold'
-                                            : 'bg-soul-dark border-gray-700 text-gray-300 hover:border-soul-gold hover:text-soul-gold'
-                                    }`}
-                                >
-                                    {mod}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                {renderInventoryButtons()}
             </div>
         </div>
     );
